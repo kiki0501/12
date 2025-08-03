@@ -6,6 +6,7 @@
     <title>修仙恋爱游戏 UI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/idb@7/build/umd.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -833,6 +834,90 @@
         background-image: linear-gradient(to right, rgba(248, 113, 113, 0.8), rgba(239, 68, 68, 0.8));
      }
     </style>
+    <style>
+     .chat-bubble .gift-bubble-container,
+     .chat-bubble .red-packet-container {
+       padding: 0;
+       overflow: hidden;
+       border: none;
+       background: none;
+       max-width: 250px;
+       min-width: 240px;
+     }
+
+     .red-packet-content {
+       background: #f9e0d9;
+       border: 1px solid #f2c8b9;
+       border-radius: 0.75rem;
+       position: relative;
+       padding: 0.75rem;
+     }
+     .red-packet-content::before {
+       content: '';
+       position: absolute;
+       top: 0;
+       left: 50%;
+       transform: translateX(-50%);
+       width: 100%;
+       height: 40px;
+       background: #e96d4f;
+       border-radius: 0.75rem 0.75rem 0 0;
+       clip-path: polygon(0% 0%, 100% 0%, 100% 60%, 55% 60%, 50% 100%, 45% 60%, 0% 60%);
+     }
+
+     .gift-bubble-content {
+       background: #d9eaf9;
+       border: 1px solid #b9d8f2;
+       border-radius: 0.75rem;
+       position: relative;
+       padding: 0.75rem;
+     }
+     .gift-bubble-content::before {
+       content: '';
+       position: absolute;
+       top: 0;
+       left: 50%;
+       transform: translateX(-50%);
+       width: 100%;
+       height: 40px;
+       background: #4f88e9;
+       border-radius: 0.75rem 0.75rem 0 0;
+       clip-path: polygon(0% 0%, 100% 0%, 100% 60%, 55% 60%, 50% 100%, 45% 60%, 0% 60%);
+     }
+
+     .red-packet-body,
+     .gift-bubble-body {
+       margin-top: 1.5rem;
+       display: flex;
+       align-items: center;
+     }
+     .red-packet-icon,
+     .gift-bubble-icon {
+       font-size: 2.5rem;
+       margin-right: 0.75rem;
+     }
+     .red-packet-text .title {
+       font-weight: bold;
+       color: #c75c40;
+     }
+     .gift-bubble-text .title {
+       font-weight: bold;
+       color: #407ac7;
+     }
+     .red-packet-text .subtitle,
+     .gift-bubble-text .subtitle {
+       font-size: 0.8rem;
+       color: #6b6b6b;
+     }
+     .red-packet-footer,
+     .gift-bubble-footer {
+       font-size: 0.7rem;
+       color: #a0a0a0;
+       border-top: 1px solid rgba(0,0,0,0.05);
+       padding-top: 0.5rem;
+       margin-top: 0.5rem;
+     }
+    </style>
   </head>
   <body class="antialiased">
     <div id="world-info-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
@@ -1600,15 +1685,21 @@
 
       // --- 状态管理 (Model) ---
       let db = {}; // This will be our single source of truth.
-      const saveData = () => {
+      
+      const dbPromise = idb.openDB('yundian-db', 1, {
+        upgrade(db) {
+          db.createObjectStore('gameState', { keyPath: 'id' });
+        },
+      });
+
+      const saveData = async () => {
         try {
           const { staticData, ...dataToSave } = db; // Exclude staticData from saving
-          localStorage.setItem('yundian-interactive-db', JSON.stringify(dataToSave));
+          const database = await dbPromise;
+          await database.put('gameState', { id: 'current', value: dataToSave });
         } catch (e) {
-          console.error("Error saving data to localStorage:", e);
-          if (e.name === 'QuotaExceededError') {
-            showToast('存档失败：浏览器存储空间已满！', 'error');
-          }
+          console.error("Error saving data to IndexedDB:", e);
+          showToast('存档失败，数据库操作错误！', 'error');
         }
       };
 
@@ -1779,8 +1870,7 @@
               items: {}
           },
           staticData: {
-              itemIconMap: {},
-              itemDescMap: {},
+              itemRegistry: {}, // AI-populated item definitions will go here.
               worldInfo: {
                 '世界观': `<world_overview>
   这是一个这是个人与妖共存的架空修仙世界。千年前人妖两族因争夺灵脉爆发大战,天地崩裂.初代天澜帝商玄与十方殿主白泽以血祭天,签订了划分领地、共享灵气的<云巅之盟>。此盟约奠定了此后千年的和平基调，但和平的表象下暗流涌动。**盟约在法理上允许两族通婚，但现实中，人族对妖族的偏见与恐惧根深蒂固，极端组织“白衣会”奉行血脉净化，而官方法规也要求通婚妖族佩戴“抑妖环”以示规训。**旧日的仇恨与新的矛盾交织，让人与妖的关系始终处于一种微妙而紧张的平衡之中。
@@ -2233,38 +2323,148 @@ details:
 
       } // closes getInitialDb function
 
-      function loadData() {
-          const defaultDb = getInitialDb();
-          try {
-              const savedDataString = localStorage.getItem('yundian-interactive-db');
-              if (!savedDataString) {
-                  throw new Error("No saved data found.");
-              }
+      async function loadData() {
+          // --- START OF TEST DATA INJECTION ---
+          const testDb = getInitialDb(); // Start with the base structure
 
-              const dynamicData = JSON.parse(savedDataString);
-              
-              // Basic validation of the loaded data
-              if (!dynamicData.protagonist || !dynamicData.world || !dynamicData.relations) {
-                  console.error("Loaded data is missing essential properties. Resetting.");
-                  throw new Error("Incomplete saved data.");
-              }
-
-              // Merge loaded dynamic data with the default static data
-              db = { ...defaultDb, ...dynamicData };
-
-              // Ensure the staticData from the code is always used, not from the save file.
-              db.staticData = defaultDb.staticData;
-              
-              // Simple, optional migration for old saves that might not have a story object.
-              if (!db.story) {
-                db.story = defaultDb.story;
-              }
-
-          } catch (e) {
-              console.warn("Failed to load or parse saved data, initializing with defaults:", e.message);
-              db = defaultDb;
-              saveData(); // Save the fresh default state
+          // 1. Protagonist
+          testDb.protagonist = {
+              name: '凌云',
+              description: '一位来自玄霄剑宗的内门弟子，剑法卓绝，但似乎对自己的过去知之甚少。',
+              identity: '玄霄剑宗内门弟子',
+              race: '人族',
+              spiritRoot: { name: '金', grade: '天品' },
+              cultivation: { realm: '筑基', stage: '五', progress: 75 },
+              points: 1250,
+              spiritStones: { '上品': 25, '下品': 8730 },
+              avatar: '', // Leave empty to use default
+          };
+          
+          // Recalculate initial relations based on new identity
+          const baseRelations = getInitialDb().relations;
+          for(const charId in testDb.relations) {
+              const baseStats = baseRelations[charId];
+              const newRelationData = testDb.calculateInitialData(charId, baseStats, testDb.protagonist.identity);
+              testDb.relations[charId] = { ...baseStats, ...newRelationData };
           }
+
+          // 2. World State
+          testDb.world = {
+              eraName: '云巅',
+              year: '1024',
+              month: '7',
+              day: '19',
+              timeOfDay: '午时',
+              timeIcon: '☀️',
+              season: '夏',
+              seasonIcon: '☀️',
+              locationName: '玄霄剑宗',
+              locationIcon: '⚔️',
+              presentNPCs: ['lingxuzi', 'qingjue', 'nalanxizhao'],
+          };
+
+          // 3. Relations (adjust some specific ones)
+          testDb.relations.lingxuzi.affinity = 85;
+          testDb.relations.lingxuzi.status = '师徒';
+          testDb.relations.lingxuzi.thought = '此子乃我玄霄剑宗百年不遇之奇才，当倾囊相授。';
+          testDb.relations.qingjue.affinity = 45;
+          testDb.relations.qingjue.status = '有趣的后辈';
+          testDb.relations.qingjue.thought = '玄霄剑宗的小家伙？有点意思。';
+          testDb.relations.nalanxizhao.affinity = 15;
+          testDb.relations.nalanxizhao.status = '需警惕';
+          testDb.relations.nalanxizhao.thought = '玄霄剑宗...凌虚子的人，需要多加留意。';
+
+          // 4. Story
+          testDb.story.logs.log_initial.log = [
+              { type: 'GM', responses: ['## 剑宗晨练\n\n清晨的阳光透过云雾，洒在玄霄剑宗的演武场上。你的师尊，凌虚子，正负手立于场中，看着你练剑。'], currentIndex: 0, memory: { time: "云巅1024年7月19日 辰时", characters: "凌云, 凌虚子", summary: "在玄霄剑宗演武场进行晨练。", items: "" } },
+              { type: 'user', responses: ['[收剑，向师尊行礼] 师尊，弟子已将昨日所学剑招演练完毕。'], currentIndex: 0 },
+              { type: 'GM', responses: ['凌虚子微微颔首，眼中露出一丝赞许。“不错，剑意纯粹，已有几分火候。不过，你的心似乎有些乱。”'], currentIndex: 0, memory: { time: "云巅1024年7月19日 辰时", characters: "凌云, 凌虚子", summary: "凌虚子指点凌云剑法，并察觉其心乱。", items: "" } },
+          ];
+
+          // 5. Inventory
+          testDb.inventory = {
+              '丹药': { '回元丹': 10, '筑基丹': 3 },
+              '法器': { '青锋剑': 1, '宗门令牌': 1 },
+              '礼品': { '百年灵芝': 2 },
+              '特殊': { '残破的地图': 1, '凝神草': 0 }
+          };
+          testDb.staticData.itemRegistry = {
+              '回元丹': { category: '丹药', description: '快速恢复灵力。', icon: '💊' },
+              '筑基丹': { category: '丹药', description: '辅助突破筑基期。', icon: '💊' },
+              '青锋剑': { category: '法器', description: '玄霄剑宗制式长剑。', icon: '⚔️' },
+              '宗门令牌': { category: '特殊', description: '身份的象征。', icon: '🔰' },
+              '百年灵芝': { category: '礼品', description: '蕴含精纯灵气。', icon: '🍄' },
+              '残破的地图': { category: '特殊', description: '似乎指向某处秘境。', icon: '🗺️' },
+              '凝神草': { category: '特殊', description: '炼制静心丹药的材料。', icon: '🌿' },
+              '大力丸': { category: '丹药', description: '暂时提升力量。', icon: '💪' },
+              '神行符': { category: '法器', description: '暂时提升速度。', icon: '💨' },
+              '心声窃听符': { category: '特殊', description: '可窃听一次他人心声。', icon: '👂' }
+          };
+
+          // 6. Messaging
+          testDb.messaging = {
+              unlockedContacts: ['lingxuzi', 'qingjue', 'fusang', 'nalanxizhao'], // Add nalanxizhao to unlocked for sender info
+              groups: {
+                  'group_1': { name: '十方殿茶话会', members: ['<user>', 'qingjue', 'fusang'], avatar: '' }
+              },
+              chatHistory: {
+                  'lingxuzi': [
+                      { id: 'msg_1', 发送方: 'lingxuzi', 内容: '今日修行可有进境？', timestamp: '昨天', unread: true, role: 'model' },
+                      // Misdirected message from Nalan Xizhao, intercepted by the player
+                      { id: 'msg_misdirected_1', 发送方: 'nalanxizhao', 内容: '目标已进入玄霄剑宗范围，继续监视。', timestamp: '刚刚', unread: true, role: 'model', misdirected: true }
+                  ],
+                  'qingjue': [
+                      { id: 'msg_2', 发送方: 'qingjue', 内容: '小家伙，有空来合欢楼坐坐？', timestamp: '10:30', unread: false, role: 'model' },
+                      { id: 'msg_3', 发送方: '<user>', 内容: '多谢前辈好意，弟子心领了。', timestamp: '10:32', role: 'user' }
+                  ],
+                  'group_1': [
+                      { id: 'msg_4', 发送方: 'qingjue', 内容: '今日的茶不错。', timestamp: '09:15', unread: true, role: 'model' }
+                  ]
+              }
+          };
+
+          // 7. Social
+          testDb.social = {
+              posts: [
+                  { id: 'post_1', author: '漱月', authorId: 'suyue', authorTag: '漱玉坊主', authorTagColor: 'blue', avatar: generateDefaultAvatar('漱'), timestamp: '昨天', content: '今日偶得新曲，不知知音何在。', image: 'https://source.unsplash.com/random/400x200?music,instrument', likeCount: 32, commentCount: 1, liked: true, comments: [{user: '陆离', text: '仙音袅袅，绕梁三日。'}] },
+                  { id: 'post_2', author: '荧惑', authorId: 'yinghuo', authorTag: '破军星君', authorTagColor: 'yellow', avatar: generateDefaultAvatar('荧'), timestamp: '2小时前', content: '新炼制的法宝又炸了一个炉子！晦气！', image: null, imagePlaceholder: '爆炸后的炼器炉废墟', likeCount: 5, commentCount: 1, liked: false, comments: [{user: '烛阴', text: '下次用我的鳞片试试。'}] }
+              ],
+              gossip: [
+                  { id: 'gossip_1', type: 'gossip-card', borderColor: 'border-yellow-400', title: '惊！天澜国惊现神秘高手！', content: '据目击者称，昨夜有人在汴京上空看到一道剑光划破天际，疑似有化神期以上高手过招！', comments: [{user: '吃瓜群众甲', text: '真的假的？不会是看错了吧？', color: 'text-blue-600'}] },
+                  { id: 'gossip_2', type: 'letter-card', borderColor: 'border-pink-400', title: '一封未署名的情书', content: '“月色很美，风也温柔，一切都刚刚好，只缺一个你。”', choices: [{text: '悄悄送达', style: 'green', action: `handleLetterAction('deliver', 'gossip_2')`}, {text: '冒名回复', style: 'yellow', action: `handleLetterAction('reply', 'gossip_2')`}, {text: '公之于众', style: 'red', action: `handleLetterAction('publicize', 'gossip_2')`}] },
+                  { id: 'gossip_3', type: 'letter-card', borderColor: 'border-indigo-400', title: '截获的密信', content: '“...事关重大，务必在子时前将‘那个东西’送到指定地点。——商”', choices: [{text: '暗中调查', style: 'yellow', action: `handleLetterAction('investigate', 'gossip_3')`}, {text: '上报师门', style: 'green', action: `handleLetterAction('report', 'gossip_3')`}, {text: '置之不理', style: 'red', action: `handleLetterAction('ignore', 'gossip_3')`}] }
+              ]
+          };
+
+          // 8. Tasks
+          testDb.tasks = {
+              in_progress: [
+                  { id: 'task_1', title: '师门的考验', description: '前往后山，采集三株凝神草。', reward: '积分+50, 获得:回元丹 x2', difficulty: 'simple', completion_condition: "db.inventory['特殊']['凝神草'] >= 3" }
+              ],
+              available: [
+                  { id: 'task_2', title: '合欢楼的委托', description: '青珏似乎有事找你帮忙，去合欢楼看看。', reward: '积分+200, 获得:下品灵石 x1000', difficulty: 'normal', completion_condition: "db.world.locationName === '合欢楼'" }
+              ],
+              completed: []
+          };
+
+          // 9. Shop
+          testDb.shop = {
+              items: {
+                  '丹药': [
+                      { id: 'shop_1', name: '大力丸', description: '暂时提升力量。', cost: 100 },
+                      { id: 'shop_2', name: '神行符', description: '暂时提升速度。', cost: 150 }
+                  ],
+                  '特殊': [
+                      { id: 'shop_3', name: '心声窃听符', description: '可窃听一次他人心声。', cost: 500 }
+                  ]
+              }
+          };
+          
+          db = testDb;
+          // --- END OF TEST DATA INJECTION ---
+          
+          // We still save this test data to IndexedDB so reloads work during testing.
+          await saveData();
       }
 
       async function generateIdentityWithAI() {
@@ -2301,10 +2501,9 @@ details:
               "cultivation": { "realm": "修为境界 (凡人或炼气)", "stage": "层数 (1-9，如果凡人则为空字符串)", "progress": 数字(0-100) },
               "points": 数字 (20-100),
               "spiritStones": { "上品": 0, "下品": 数字 (10-150) },
-              "inventory": { "分类 (例如：法器)": { "物品名称": 数量 } },
               "background": "一段简短精炼(不超过100字)的背景故事，解释这个身份的来历和现状。"
             }
-
+ 
             # 输出示例 (请勿直接使用)
             {
               "identity": "来自南海归墟岛的书生",
@@ -2313,7 +2512,6 @@ details:
               "cultivation": { "realm": "凡人", "stage": "", "progress": 0 },
               "points": 80,
               "spiritStones": { "上品": 0, "下品": 120 },
-              "inventory": { "特殊": { "一卷残破的海图": 1 } },
               "background": "你本是清霄书院的一名普通学子，但在一次风暴中被卷入大海，漂流至此。你失去了大部分记忆，只记得自己似乎在寻找着什么重要的东西。"
             }
 
@@ -2358,8 +2556,8 @@ details:
           db.protagonist.spiritStones = identityObj.spiritStones;
 
           // Overwrite inventory
-          db.inventory = { '丹药': {}, '法器': {}, '礼品': {}, '特殊': {}, ...identityObj.inventory };
-
+          db.inventory = { '丹药': {}, '法器': {}, '礼品': {}, '特殊': {} };
+ 
           // Recalculate relations affinity
           Object.keys(db.relations).forEach(charId => {
               const newRelationData = calculateInitialData(charId, db.protagonist.identity);
@@ -2395,7 +2593,7 @@ details:
       }
 
       function getDynamicIcon(itemName) {
-        return db.staticData.itemIconMap[itemName] || '❓';
+        return (db.staticData.itemRegistry && db.staticData.itemRegistry[itemName]?.icon) || '❓';
       }
 
       function compressImage(file, maxWidth = 256, quality = 0.8) {
@@ -2480,7 +2678,7 @@ details:
               for (const itemName in items) {
                 const itemCount = items[itemName];
                 const itemIcon = getDynamicIcon(itemName); // Use new dynamic icon function
-                const itemDesc = db.staticData.itemDescMap[itemName] || '';
+                const itemDesc = (db.staticData.itemRegistry && db.staticData.itemRegistry[itemName]?.description) || '';
                 const itemHTML = `
                                 <button class="inventory-item" data-item-name="${itemName}" data-category="${category}">
                                     <div class="item-quantity">x${itemCount}</div>
@@ -2856,21 +3054,49 @@ details:
            if (message.type === 'photo' && message.photo) {
                bubble.innerHTML = `<img src="${message.photo}" class="max-w-full h-auto rounded-md" style="max-height: 200px;" />`;
            } else if (message.type === 'transfer' && message.amount) {
-                bubble.classList.remove('sent', 'received'); // Remove default bubble styles
-                bubble.style.backgroundColor = 'transparent';
-                bubble.style.border = 'none';
-                bubble.innerHTML = `<div class="p-3 rounded-lg" style="background-color: #fbeee8;">
-                                     <div class="flex items-center">
-                                       <span class="text-3xl mr-3">🧧</span>
-                                       <div>
-                                         <p class="font-bold text-gray-800">灵石红包</p>
-                                         <p class="text-lg font-bold text-red-600">${message.amount} ${message.currency}</p>
+                 bubble.classList.add('red-packet-container');
+                 const isReceived = message.status === 'received';
+                 const subtitle = isReceived ? `已领取` : `点击领取`;
+                 bubble.innerHTML = `<div class="red-packet-content">
+                                       <div class="red-packet-body">
+                                         <div class="red-packet-icon">🧧</div>
+                                         <div class="red-packet-text">
+                                           <p class="title">${message.amount} ${message.currency}</p>
+                                           <p class="subtitle" id="subtitle-${message.id}">${subtitle}</p>
+                                         </div>
                                        </div>
-                                     </div>
-                                   </div>`;
-           }
-           else {
-               bubble.textContent = 内容;
+                                       <div class="red-packet-footer">灵石红包</div>
+                                     </div>`;
+                  if (!isReceived && !isUser) {
+                    const actions = document.createElement('div');
+                    actions.className = 'flex justify-end gap-2 mt-2';
+                    actions.innerHTML = `<button class="choice-button choice-button-yellow !text-xs !py-0 !px-2" onclick="handleGiftOrRedPacket('${message.id}', 'reject')">拒收</button>
+                                         <button class="choice-button choice-button-green !text-xs !py-0 !px-2" onclick="handleGiftOrRedPacket('${message.id}', 'accept')">领取</button>`;
+                    bubble.querySelector('.red-packet-content').appendChild(actions);
+                  }
+           } else if (message.type === 'gift' && message.itemName) {
+                 bubble.classList.add('gift-bubble-container');
+                 const isReceived = message.status === 'received';
+                 const subtitle = isReceived ? `已收下` : `赠予你一件礼物`;
+                 bubble.innerHTML = `<div class="gift-bubble-content">
+                                       <div class="gift-bubble-body">
+                                         <div class="gift-bubble-icon">${getDynamicIcon(message.itemName)}</div>
+                                         <div class="gift-bubble-text">
+                                           <p class="title">${message.itemName}</p>
+                                           <p class="subtitle" id="subtitle-${message.id}">${subtitle}</p>
+                                         </div>
+                                       </div>
+                                       <div class="gift-bubble-footer">赠礼</div>
+                                     </div>`;
+                  if (!isReceived && !isUser) {
+                    const actions = document.createElement('div');
+                    actions.className = 'flex justify-end gap-2 mt-2';
+                    actions.innerHTML = `<button class="choice-button choice-button-yellow !text-xs !py-0 !px-2" onclick="handleGiftOrRedPacket('${message.id}', 'reject')">拒收</button>
+                                         <button class="choice-button choice-button-green !text-xs !py-0 !px-2" onclick="handleGiftOrRedPacket('${message.id}', 'accept')">收下</button>`;
+                    bubble.querySelector('.gift-bubble-content').appendChild(actions);
+                  }
+           } else {
+              bubble.textContent = 内容;
            }
 
           bubbleWrapper.appendChild(checkbox);
@@ -4230,8 +4456,8 @@ forbidden_topics:
          }
       }
 
-      document.addEventListener('DOMContentLoaded', () => {
-        loadData(); // Load data from localStorage on start
+      document.addEventListener('DOMContentLoaded', async () => {
+        await loadData(); // Load data from IndexedDB on start (async)
         updateWorldDate(); // Initialize season based on date
         renderApp();
         setupApiSettingsApp(); // Initialize API settings logic
@@ -4954,9 +5180,10 @@ forbidden_topics:
              const message = {
                  id: `msg_${Date.now()}`,
                  role: 'user',
-                 type: 'text',
+                 type: 'gift', // <--- Change type to 'gift'
                  发送方: '<user>',
-                 内容: `(将${itemName}递给你)`, // This is conversational and gives context to AI
+                 内容: `[赠送了 ${itemName}]`, // Keep a text fallback for history
+                 itemName: itemName, // Add itemName for styling
                  timestamp: Date.now(),
              };
 
@@ -4972,21 +5199,53 @@ forbidden_topics:
              renderPrivateMessageList();
              saveData();
 
-             // 4. Get AI's reaction
-             getAiReply();
+             // 4. AI reaction is now triggered manually by the user
+             // getAiReply();
          }
+     }
+
+     function handleGiftOrRedPacket(messageId, action) {
+       const chatId = chatView.dataset.currentChatId;
+       if (!chatId || !db.messaging.chatHistory[chatId]) return;
+
+       const message = db.messaging.chatHistory[chatId].find(m => m.id === messageId);
+       if (!message || message.status === 'received') return;
+
+       message.status = 'received'; // Mark as handled
+
+       if (action === 'accept') {
+           if (message.type === 'transfer') {
+               db.protagonist.spiritStones[message.currency] = (db.protagonist.spiritStones[message.currency] || 0) + message.amount;
+               showToast(`领取成功，获得 ${message.currency} x${message.amount}`, 'success');
+           } else if (message.type === 'gift') {
+               const category = (db.staticData.itemRegistry && db.staticData.itemRegistry[message.itemName]?.category) || '特殊';
+               db.inventory[category][message.itemName] = (db.inventory[category][message.itemName] || 0) + 1;
+               showToast(`收下成功，获得 ${message.itemName} x1`, 'success');
+           }
+       } else { // reject
+            showToast(message.type === 'transfer' ? '你拒收了灵石红包' : '你拒收了礼物', 'success');
+       }
+
+       // Update the UI to reflect the action
+       const subtitleEl = document.getElementById(`subtitle-${message.id}`);
+       const buttonContainer = subtitleEl.closest('.red-packet-content, .gift-bubble-content').querySelector('.flex.justify-end');
+       if (subtitleEl) {
+           if(action === 'accept') {
+               subtitleEl.textContent = message.type === 'transfer' ? '已领取' : '已收下';
+           } else {
+               subtitleEl.textContent = message.type === 'transfer' ? '已拒收' : '已拒收';
+           }
+       }
+       if (buttonContainer) {
+           buttonContainer.remove();
+       }
+       
+       saveData();
+       renderPlayerAttributes();
+       renderInventory();
      }
      
      function grantTaskReward(rewardString) {
-         const itemCategoryMap = {
-             '回元丹': '丹药',
-             '蕴灵丹': '丹药',
-             '新手木剑': '法器',
-             '传音螺': '法器',
-             '同心结': '礼品',
-             '一束无名野花': '礼品'
-         };
-
          const rewards = rewardString.split(',');
          rewards.forEach(reward => {
              reward = reward.trim();
@@ -5003,7 +5262,7 @@ forbidden_topics:
                      const itemName = match[1].trim();
                      const quantity = parseInt(match[2], 10);
                      
-                     const category = itemCategoryMap[itemName] || '特殊';
+                     const category = (db.staticData.itemRegistry && db.staticData.itemRegistry[itemName]?.category) || '特殊';
 
                      if (!db.inventory[category]) {
                          db.inventory[category] = {};
@@ -5069,7 +5328,7 @@ forbidden_topics:
 
            iconEl.textContent = getDynamicIcon(itemName);
            nameEl.textContent = itemName;
-           descEl.textContent = db.staticData.itemDescMap[itemName] || '暂无描述。';
+           descEl.textContent = (db.staticData.itemRegistry && db.staticData.itemRegistry[itemName]?.description) || '暂无描述。';
            quantityEl.textContent = item;
            
            targetSelection.classList.add('hidden');
@@ -5215,7 +5474,10 @@ forbidden_topics:
        const actionTextMap = {
            'deliver': '悄悄送达',
            'reply': '冒名回复',
-           'publicize': '公之于众'
+           'publicize': '公之于众',
+           'investigate': '暗中调查',
+           'report': '上报师门',
+           'ignore': '置之不理'
        };
        const actionDescription = actionTextMap[action] || '处理';
 
@@ -5367,6 +5629,22 @@ forbidden_topics:
                    }
                }
  
+                // Handle NewItem creation
+               const newItemMatches = fullResponse.matchAll(/<NewItem\s+name="([^"]+)"\s+category="([^"]+)"\s+description="([^"]+)"\s+icon="([^"]+)"\s*\/>/g);
+               for (const match of newItemMatches) {
+                   const [, name, category, description, icon] = match;
+                   if (name && category && description && icon) {
+                       if (!db.staticData.itemRegistry[name]) {
+                           db.staticData.itemRegistry[name] = {
+                               category: category,
+                               description: description,
+                               icon: icon
+                           };
+                            showToast(`新图鉴解锁: ${icon} ${name}`, 'success');
+                       }
+                   }
+               }
+
                 const commandMatch = fullResponse.match(/<Command>([\s\S]*)<\/Command>/);
                 if (commandMatch) {
                     try {
@@ -5604,6 +5882,10 @@ forbidden_topics:
        -   这对于在主线剧情后，补充角色的私下反应或后续行动非常重要。
   5.  **触发命令 (可选)**: 如果剧情需要执行一个特定的游戏动作，比如创建一个群聊，则生成一个 **<Command>** 代码块。
        -   <CreateGroup groupName="群聊名称" initiator="发起人角色名" members="<user>,角色A,角色B" />
+  6.  **创造新物品 (可选)**: 当剧情需要（如任务奖励、商店刷新、角色赠予、奇遇发现）时，你可以创造一个全新的、世界上从未出现过的物品。
+      -   **格式**: 必须使用 \`<NewItem>\` 标签，并包含 \`name\`, \`category\`, \`description\`, 和 \`icon\` 属性。
+      -   **示例**: \`<NewItem name="流云仙酿" category="丹药" description="饮用后可暂时提升修为，但有醉倒的风险。" icon="🍶" />\`
+      -   **类别**: 物品的 \`category\` 必须是 '丹药', '法器', '礼品', '特殊' 中的一个。
 
   # 11. 输出格式（必须严格遵守）
   <story>
@@ -5636,6 +5918,8 @@ forbidden_topics:
   <Command>
      <CreateGroup groupName="临时作战会议" initiator="纳兰奚照" members="<user>,青珏" />
   </Command>
+  
+  <NewItem name="淬火灵石" category="特殊" description="一块在天火中淬炼过的灵石，似乎蕴含着奇特的能量。" icon="🔥" />
 
   请开始生成回应。`;
        }
@@ -6071,9 +6355,6 @@ forbidden_topics:
        showToast('动态发布成功！', 'success');
      });
 
-   </script>
-   <script>
-     // The generateImageWithAI function was here, but is no longer needed.
    </script>
       </div>
     </div>
