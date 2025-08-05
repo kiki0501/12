@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>云巅灵契录（Yuki）</title>
+    <title>修仙恋爱游戏 UI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/idb@7/build/umd.js"></script>
@@ -4593,11 +4593,14 @@ forbidden_topics:
       function setupFabDrag() {
         const fabContainer = document.querySelector('.fab-container');
         const fabButton = document.getElementById('fab-button');
-        if (!fabContainer || !fabButton) return;
+        const fabMenu = document.getElementById('fab-menu');
+        if (!fabContainer || !fabButton || !fabMenu) return;
 
         fabButton.style.cursor = 'move';
         let isDragging = false;
+        let hasDragged = false;
         let dragOffsetX, dragOffsetY;
+        let startX, startY;
 
         const getCoords = (e) => {
             return e.touches ? e.touches[0] : e;
@@ -4605,63 +4608,77 @@ forbidden_topics:
 
         const dragStart = (e) => {
             isDragging = true;
+            hasDragged = false;
             const coords = getCoords(e);
+            startX = coords.clientX;
+            startY = coords.clientY;
             
             const rect = fabContainer.getBoundingClientRect();
             dragOffsetX = coords.clientX - rect.left;
             dragOffsetY = coords.clientY - rect.top;
 
-            fabContainer.style.top = `${rect.top}px`;
-            fabContainer.style.left = `${rect.left}px`;
-            fabContainer.style.right = 'auto';
-            fabContainer.style.bottom = 'auto';
-            
             document.addEventListener('mousemove', dragMove);
             document.addEventListener('touchmove', dragMove, { passive: false });
-            document.addEventListener('mouseup', dragEnd, { once: true });
-            document.addEventListener('touchend', dragEnd, { once: true });
-            
-            if (e.type === 'touchstart') {
-                e.preventDefault();
-            }
+            document.addEventListener('mouseup', dragEnd);
+            document.addEventListener('touchend', dragEnd);
         };
 
         const dragMove = (e) => {
             if (!isDragging) return;
-            
+
             const coords = getCoords(e);
-            let newLeft = coords.clientX - dragOffsetX;
-            let newTop = coords.clientY - dragOffsetY;
+            const deltaX = Math.abs(coords.clientX - startX);
+            const deltaY = Math.abs(coords.clientY - startY);
 
-            const rect = fabContainer.getBoundingClientRect();
-            newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width));
-            newTop = Math.max(0, Math.min(newTop, window.innerHeight - rect.height));
+            if (!hasDragged && (deltaX > 5 || deltaY > 5)) {
+                hasDragged = true;
+                const rect = fabContainer.getBoundingClientRect();
+                fabContainer.style.top = `${rect.top}px`;
+                fabContainer.style.left = `${rect.left}px`;
+                fabContainer.style.right = 'auto';
+                fabContainer.style.bottom = 'auto';
+            }
 
-            fabContainer.style.left = `${newLeft}px`;
-            fabContainer.style.top = `${newTop}px`;
-            
-            if (e.type === 'touchmove') {
-                e.preventDefault();
+            if (hasDragged) {
+                if (e.type === 'touchmove') {
+                    e.preventDefault();
+                }
+                let newLeft = coords.clientX - dragOffsetX;
+                let newTop = coords.clientY - dragOffsetY;
+
+                const rect = fabContainer.getBoundingClientRect();
+                newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width));
+                newTop = Math.max(0, Math.min(newTop, window.innerHeight - rect.height));
+
+                fabContainer.style.left = `${newLeft}px`;
+                fabContainer.style.top = `${newTop}px`;
             }
         };
 
-        const dragEnd = () => {
+        const dragEnd = (e) => {
+            // Only toggle menu on touchend/mouseup if it was not a drag
+            if (isDragging && !hasDragged) {
+                fabMenu.classList.toggle('active');
+            }
+            
             isDragging = false;
+            
             document.removeEventListener('mousemove', dragMove);
             document.removeEventListener('touchmove', dragMove);
+            document.removeEventListener('mouseup', dragEnd);
+            document.removeEventListener('touchend', dragEnd);
         };
 
         fabButton.addEventListener('mousedown', dragStart);
-        fabButton.addEventListener('touchstart', dragStart);
+        fabButton.addEventListener('touchstart', dragStart, { passive: true });
       }
 
       const fabButton = document.getElementById('fab-button');
       const fabMenu = document.getElementById('fab-menu');
 
-      fabButton.addEventListener('click', (event) => {
-        event.stopPropagation();
-        fabMenu.classList.toggle('active');
-      });
+      // The click/tap logic is now handled within the dragStart/dragEnd functions
+      // to correctly differentiate between a drag and a tap.
+      // The original click listener is removed to prevent conflicts.
 
       document.addEventListener('click', (event) => {
         if (!fabMenu.contains(event.target) && !fabButton.contains(event.target)) {
@@ -6596,4 +6613,3 @@ forbidden_topics:
     </div>
   </body>
 </html>
-
