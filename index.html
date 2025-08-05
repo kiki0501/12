@@ -4596,81 +4596,110 @@ forbidden_topics:
         const fabMenu = document.getElementById('fab-menu');
         if (!fabContainer || !fabButton || !fabMenu) return;
 
-        fabButton.style.cursor = 'move';
+        fabButton.style.cursor = 'pointer';
         let isDragging = false;
         let hasDragged = false;
         let dragOffsetX, dragOffsetY;
         let startX, startY;
+        let dragTimer = null;
 
         const getCoords = (e) => {
-            return e.touches ? e.touches[0] : e;
+          return e.touches ? e.touches[0] : e;
         };
 
-        const dragStart = (e) => {
-            isDragging = true;
-            hasDragged = false;
-            const coords = getCoords(e);
-            startX = coords.clientX;
-            startY = coords.clientY;
-            
-            const rect = fabContainer.getBoundingClientRect();
-            dragOffsetX = coords.clientX - rect.left;
-            dragOffsetY = coords.clientY - rect.top;
+        // 新增：辅助判断点击/拖拽
+        function isTap(startX, startY, endX, endY) {
+          const dx = Math.abs(endX - startX);
+          const dy = Math.abs(endY - startY);
+          return dx < 8 && dy < 8;
+        }
 
-            document.addEventListener('mousemove', dragMove);
-            document.addEventListener('touchmove', dragMove, { passive: false });
-            document.addEventListener('mouseup', dragEnd);
-            document.addEventListener('touchend', dragEnd);
+        const dragStart = (e) => {
+          isDragging = true;
+          hasDragged = false;
+          const coords = getCoords(e);
+          startX = coords.clientX;
+          startY = coords.clientY;
+
+          const rect = fabContainer.getBoundingClientRect();
+          dragOffsetX = coords.clientX - rect.left;
+          dragOffsetY = coords.clientY - rect.top;
+
+          document.addEventListener('mousemove', dragMove);
+          document.addEventListener('touchmove', dragMove, { passive: false });
+          document.addEventListener('mouseup', dragEnd);
+          document.addEventListener('touchend', dragEnd);
         };
 
         const dragMove = (e) => {
-            if (!isDragging) return;
+          if (!isDragging) return;
 
-            const coords = getCoords(e);
-            const deltaX = Math.abs(coords.clientX - startX);
-            const deltaY = Math.abs(coords.clientY - startY);
+          const coords = getCoords(e);
+          const deltaX = Math.abs(coords.clientX - startX);
+          const deltaY = Math.abs(coords.clientY - startY);
 
-            if (!hasDragged && (deltaX > 5 || deltaY > 5)) {
-                hasDragged = true;
-                const rect = fabContainer.getBoundingClientRect();
-                fabContainer.style.top = `${rect.top}px`;
-                fabContainer.style.left = `${rect.left}px`;
-                fabContainer.style.right = 'auto';
-                fabContainer.style.bottom = 'auto';
+          if (!hasDragged && (deltaX > 5 || deltaY > 5)) {
+            hasDragged = true;
+            const rect = fabContainer.getBoundingClientRect();
+            fabContainer.style.top = `${rect.top}px`;
+            fabContainer.style.left = `${rect.left}px`;
+            fabContainer.style.right = 'auto';
+            fabContainer.style.bottom = 'auto';
+          }
+
+          if (hasDragged) {
+            if (e.type === 'touchmove') {
+              e.preventDefault();
             }
+            let newLeft = coords.clientX - dragOffsetX;
+            let newTop = coords.clientY - dragOffsetY;
 
-            if (hasDragged) {
-                if (e.type === 'touchmove') {
-                    e.preventDefault();
-                }
-                let newLeft = coords.clientX - dragOffsetX;
-                let newTop = coords.clientY - dragOffsetY;
+            const rect = fabContainer.getBoundingClientRect();
+            newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width));
+            newTop = Math.max(0, Math.min(newTop, window.innerHeight - rect.height));
 
-                const rect = fabContainer.getBoundingClientRect();
-                newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width));
-                newTop = Math.max(0, Math.min(newTop, window.innerHeight - rect.height));
-
-                fabContainer.style.left = `${newLeft}px`;
-                fabContainer.style.top = `${newTop}px`;
-            }
+            fabContainer.style.left = `${newLeft}px`;
+            fabContainer.style.top = `${newTop}px`;
+          }
         };
 
         const dragEnd = (e) => {
-            // Only toggle menu on touchend/mouseup if it was not a drag
-            if (isDragging && !hasDragged) {
-                fabMenu.classList.toggle('active');
-            }
-            
-            isDragging = false;
-            
-            document.removeEventListener('mousemove', dragMove);
-            document.removeEventListener('touchmove', dragMove);
-            document.removeEventListener('mouseup', dragEnd);
-            document.removeEventListener('touchend', dragEnd);
+          const coords = getCoords(e);
+          // 只要没有明显拖动，判定为点击
+          if (isDragging && !hasDragged && isTap(startX, startY, coords.clientX, coords.clientY)) {
+            fabMenu.classList.toggle('active');
+          }
+          isDragging = false;
+
+          document.removeEventListener('mousemove', dragMove);
+          document.removeEventListener('touchmove', dragMove);
+          document.removeEventListener('mouseup', dragEnd);
+          document.removeEventListener('touchend', dragEnd);
         };
 
+        // 兼容：点击事件（PC/移动端都能点开）
         fabButton.addEventListener('mousedown', dragStart);
-        fabButton.addEventListener('touchstart', dragStart, { passive: true });
+        fabButton.addEventListener('touchstart', dragStart, { passive: false });
+
+        // 额外：防止误触，点击 FAB 空白区域也能展开菜单
+        fabButton.addEventListener('click', function (e) {
+          // 如果不是拖拽，且菜单未展开，则展开
+          if (!hasDragged && !fabMenu.classList.contains('active')) {
+            fabMenu.classList.add('active');
+          }
+        });
+
+        // 关闭菜单时，点击 FAB 以外区域自动关闭
+        document.addEventListener('touchend', function (e) {
+          if (!fabButton.contains(e.target) && !fabMenu.contains(e.target)) {
+            fabMenu.classList.remove('active');
+          }
+        });
+        document.addEventListener('mousedown', function (e) {
+          if (!fabButton.contains(e.target) && !fabMenu.contains(e.target)) {
+            fabMenu.classList.remove('active');
+          }
+        });
       }
 
       const fabButton = document.getElementById('fab-button');
