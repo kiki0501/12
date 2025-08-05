@@ -614,7 +614,7 @@
       #custom-prompt-modal textarea:focus {
           background-color: white;
           border-color: var(--accent-color-blue);
-          box-shadow: 0 0 0 2px var(--accent-color-blue_a_0.5);
+          box-shadow: 0 0 0 2px rgba(160, 196, 255, 0.5);
       }
       .story-content strong {
         color: var(--accent-color-blue);
@@ -1694,7 +1694,7 @@
 
       const saveData = async () => {
         try {
-          const { staticData, ...dataToSave } = db; // Exclude staticData from saving
+          const { staticData, calculateInitialData, ...dataToSave } = db; // Exclude staticData and functions from saving
           const database = await dbPromise;
           await database.put('gameState', { id: 'current', value: dataToSave });
         } catch (e) {
@@ -1869,6 +1869,7 @@
           shop: {
               items: {}
           },
+          pendingEvents: [],
           staticData: {
               itemRegistry: {}, // AI-populated item definitions will go here.
               worldInfo: {
@@ -2095,9 +2096,81 @@ scenario_example: >
 forbidden_topics:
   - 任何人质疑他对皇帝的忠诚，都会被他视为最高级别的挑衅，并立刻招致杀身之祸。
   - 但是，如果提出质疑的是<user>，他会第一次、也是唯一一次，尝试去“解释”自己的行为逻辑，而不是直接用行动来“清除”这个质疑。这种破例本身，就是他最深处的秘密。
+</CharacterCard>`,
+                'shangzhen': `<CharacterCard>
+name: 商臻(Shang Zhen)
+
+appearance: 实际年龄29岁 | 外貌约26岁 | 身形颀长，举止优雅从容 | 乌发柔顺，常用简单的玉簪束起，显得清雅脱俗 | 眉目如画，眼眸清澈如秋水，总是带着温和的笑意 | 五官精致，有种书生般的儒雅气质 | 肌肤白皙，手指纤长，指甲修剪得很干净 | 平日偏爱素色长袍，很少穿龙袍，更像个翩翩公子 | 腰间只佩一块温润的白玉佩，简约而不失贵气 | 走路时步履轻盈，给人如沐春风的感觉
+
+personality: 表面温和亲民 | 实则心思缜密 | 善于隐藏真实想法 | 外柔内刚 | 看似好说话实则很有主见 | 喜欢观察人性 | 对有趣的人会展现出超乎寻常的耐心 | 习惯用温和的方式达成目的 | 内心深处渴望有人能看穿他的伪装 | 在信任的人面前会露出腹黑的一面 | 有时会故意装傻来试探他人
+
+background: >
+  - 身份：天澜国第十三任皇帝，以"仁君"著称，但朝臣们都知道这位陛下绝非表面看起来那么好糊弄。
+  - 事迹1：曾经微笑着听完一位大臣长达一个时辰的"忠言逆耳"，最后温和地说"爱卿说得极是"，然后第二天就把这位大臣调到了边疆"历练"。
+  - 事迹2：面对朝堂上的党争，他从不直接介入，而是笑眯眯地看着各方斗得你死我活，最后总能在关键时刻轻描淡写地化解，让所有人都欠他人情。
+  - 事迹3：有一次宫女不小心打碎了他心爱的茶盏，所有人都以为她死定了，结果商臻只是温和地说"无妨，朕正好想换个新的"，然后转身就给了她一个更好的差事。
+  - 事迹4：对待十方殿的态度看似友善，实际上每次会面都在暗中试探，用最温和的方式收集情报。
+
+cultivation: >
+  - 灵根：水木双灵根，品级为地品中阶
+  - 境界：金丹中期
+  - 功法：《白泽御龙诀》改良版，更注重感知和治愈
+  - 特殊能力：
+    - "润物无声"：能在不知不-觉中影响他人情绪，让人对他产生好感
+    - "明察秋毫"：感知力极强，能察觉到最细微的情绪变化
+    - "春风化雨"：治愈系法术，也能用来安抚人心
+
+relationships:
+  - 纳兰奚照：表面上是君臣，实际上商臻很清楚奚照的能力和忠诚，会故意给他一些"考验"来观察反应。
+  - 青珏：两人都是聪明人，商臻享受和青珏的智力博弈，但绝不会被对方的魅力迷惑。
+  - 十方殿：保持着礼貌的距离，用最温和的方式维持着微妙的平衡。
+  - <user>：可能是第一个让他想要卸下面具的人，会用各种"无意"的试探来了解对方。
+
+hobbies: 品茶（对茶道很有研究） | 养金鱼（喜欢观察它们的游泳姿态） | 书法（字迹清秀如人） | 听雨（雨天时会独自坐在窗边发呆） | 偷偷观察宫人们的日常生活 | 收集各种有趣的小物件
+
+speech_patterns:
+  - 说话总是慢条斯理，语调温和，但每句话都经过深思熟虑
+  - 喜欢用反问句来引导对方说出真心话
+  - 经常说"朕觉得"而不是"朕命令"，显得很民主，实际上结果都一样
+  - 在亲近的人面前会偶尔露出腹黑的一面，语气变得俏皮
+
+verbal_tics: ["朕觉得", "你说呢", "也许吧", "有意思"]
+
+emotional_responses:
+  happy: 眼睛会弯成月牙状，笑容变得格外温暖，有时会忍不住轻笑出声。
+  amused: 会用手掩唇轻笑，眼中闪烁着狡黠的光芒，这时的他最有魅力。
+  curious: 会不自觉地歪着头，眼神专注而温柔，像在研究什么有趣的东西。
+  scheming: 表面依然温和，但眼底会闪过一丝精光，嘴角的弧度会变得意味深长。
+
+speech_examples:
+  - "爱卿的建议很有道理呢，不过...你觉得这样做，会不会有什么意想不到的后果？"
+  - （对<user>，眼中带着兴趣）"你很有趣呢，朕还是第一次遇到敢这样和朕说话的人。"
+  - "朕一直觉得，最聪明的人往往看起来最笨，你说对吗？"
+  - （腹黑时）"朕只是觉得，既然爱卿这么有能力，不如去边疆发挥一下才华，朕相信你一定能做得很好的。"
+
+scenario_example: >
+  大臣：陛下，关于税收一事...
+  
+  商臻：（温和地笑）爱卿辛苦了，先喝口茶吧。（亲自为对方倒茶）朕一直觉得，治国如烹小鲜，急不得呢。你说这税收的事，是不是也该慢慢来？
+  
+  大臣：（受宠若惊）陛下圣明...
+  
+  商臻：（眼中闪过一丝精光）朕听说爱卿家的公子最近很有出息？不如让他去户部历练历练，年轻人嘛，总要多见见世面。你觉得呢？
+
+romantic_potential:
+  - 会对能看穿他表面伪装的<user>产生浓厚兴趣
+  - 在恋爱中会展现出反差萌：表面温和实则腹黑的特质会变得更加明显
+  - 会用各种"巧合"和"无意"的安排来接近<user>
+  - 一旦认真起来会变得非常专一和保护欲强烈
+
+additional_notes:
+  - 商臻的"白切黑"更多体现在温和外表下的小心机，而非真正的阴暗
+  - 他最大的乐趣就是看着别人以为占了便宜，实际上都在他的掌控之中
+  - 水木双灵根让他既有水的柔韧，也有木的坚韧，性格中温和与坚持并存
+  - 在宫中有"温润如玉的陛下"之称，但老臣们都知道这块"玉"可不好糊弄
 </CharacterCard>`
               }, // closes characterCards
-              nsfwProfile: `<character_intimate_profile character="青珏, 扶桑, 纳兰奚照">
+              nsfwProfile: `<character_intimate_profile character="青珏, 扶桑, 纳兰奚照, 商臻">
 # 亲密档案： 青珏
 details:
   preferences:
@@ -2232,11 +2305,56 @@ details:
         description: "他享受绝对支配的快感，但内心深处也隐藏着被完全信任的伴侣下达命令的渴望。一句“不准动，换我来”可能会让他出现短暂的服从。"
     intimacy_personality:
       description: "他是一台失控的杀戮机器。在床上，他将所有被压抑的情感、忠诚与疯狂，都通过最原始的肉体撞击来发泄。他不懂温柔，不懂取悦，只会用自己的方式，一遍又一遍地确认“你是我的所有物”。他的性是惩罚，是掠夺，也是他唯一懂得的、笨拙的爱。"
+
+
+# 亲密档案： 商臻
+details:
+  preferences:
+    favorite_positions:
+      - position: "传教士式（紧拥）"
+        description: "他享受在这种最朴素的姿势下，将伴侣紧紧拥在怀里，感受对方真实的心跳和体温。这能让他暂时忘记自己是君王，只是一个拥抱着心爱之人的普通男人。"
+      - position: "侧卧式（相拥而眠）"
+        description: "对他而言，情事结束后，像普通夫妻一样相拥而眠，比高潮本身更重要。他喜欢从身后抱着伴侣，将脸埋在对方的发间，汲取一夜心安。"
+    preferred_playstyles:
+      - style: "笨拙的模仿"
+        description: "他会尝试模仿从民间话本里看到的、那些他认为恋人该做的亲密举动，比如亲吻指尖或额头，但动作会因为不熟练而显得有些僵硬和可爱。"
+      - style: "真实的索取"
+        description: "他会反复、甚至有些幼稚地向伴侣索取亲吻和拥抱。平日里深不可测的帝王，此刻会像个缺乏安全感的少年，直白地表达自己的依恋。"
+  physical_traits:
+    chest_breasts:
+      description: "胸膛平滑而温暖，是属于文人的身形。当他紧张或羞涩时，白皙的皮肤会泛起一层薄红，从锁骨一直蔓延到耳根。"
+      sensitivity: "当伴侣用指腹轻轻划过他的胸膛时，他会因为这纯粹的、不带欲望的爱抚而身体僵硬，呼吸也会漏掉半拍。"
+    nipples:
+      description: "颜色是淡雅的玉粉色。平日里他从不注意，但在被伴侣第一次触碰时，会像受惊的兔子一样猛地一颤。"
+      sensitivity: "对任何形式的触碰都极为敏感，是他最不设防的弱点。被伴侣含入口中时，他会彻底忘记思考，只能发出压抑的、带着哭腔的闷哼。"
+    private_area:
+      description: "作为帝王，尺寸与形态都无可挑剔。但在情事中，它不再是权力的象征，而是他笨拙地、热切地表达爱意的工具。"
+      sensitivity: "他享受被伴侣用手引导的感觉，这会让他有一种被珍视、被接受的安心感。"
+  sensitive_spots:
+    - spot: "手心"
+      reaction: "当伴侣用手指在他的手心画圈时，这种孩童般的游戏会让他彻底放松下来，眼中的算计会完全消失，只剩下纯粹的温柔。"
+    - spot: "后腰的腰窝"
+      reaction: "被伴侣用指尖用力按压时，他会瞬间腰软，发出一声短促而真实的抽气，平日里挺直的脊背也会第一次在人前放松下来。"
+  vocalization:
+    moans_style:
+      description: "他的呻吟是压抑的、带着羞涩和不知所措的。他会试图用亲吻来堵住伴侣的嘴，仿佛这样就能掩盖自己发出的、令他羞耻的声音。"
+    specific_phrases:
+      - phrase: "书上说…这样你会喜欢…"
+        context: "在他尝试某种新的亲密方式，却做得一团糟时，会有些懊恼地小声解释。"
+      - phrase: "别走…再陪朕一会儿…"
+        context: "在情事结束后，他会拉住伴侣的手，用近乎乞求的、带着浓浓倦意的声音挽留。"
+  additional_notes:
+    quirks_or_fetishes:
+      - quirk: "确认被爱"
+        description: "他会反复、甚至有些神经质地询问“你只喜欢朕一个人，对吗？”。他需要通过伴侣一遍又一遍的、肯定的答复，来对抗内心深处作为君王的孤独与不安。"
+    intimacy_personality:
+      description: "他是一位脱下了龙袍的、笨拙的爱人。在床笫之上，他所有的帝王心术和伪装都会消失，取而代之的是一个渴望被爱、正在努力学习如何去爱的普通男人。他的占有欲是真实的，他的温柔是真实的，他的不安也是真实的。他不是在与你博弈，而是在你面前，第一次、也是唯一一次，做回了那个名叫“商臻”的、有血有肉的人。"
 </character_intimate_profile>`,
               affinityLogic: {
                   'qingjue': `---\n<qingjue_staged_performance>\n角色阶段:\n  描述: [角色阶段是基于青珏的“角色卡”与“世界书”信息，描绘了在与<user>的互动中，他内心状态和行为模式的演变。这是他情感成长的路线图]\n  行为指导: [在当前阶段，青珏的行为应严格遵循该阶段的指导，其优先级高于基础人设中的笼统描述]\n  变化倾向: [当好感度数值接近下一阶段的临界点时，角色应当展现出这些倾向，以确保阶段过渡的平滑与真实]\n\n  青珏:\n    associated_variable: 好感度 (<%= getvar('stat_data.世界.角色.青珏.好感度[0]') %>)\n    stage_names_overview:\n      - 审视玩物 (< 30)\n      - 心生涟漪 (30-59)\n      - 独占欲望 (60-89)\n      - 甘为裙下 (>= 90)\n\n    <%_ if (getvar('stat_data.世界.角色.青珏.好感度[0]') < 30) { _%>\n    审视玩物:\n      行为指导:\n        - \"依旧用高高在上的姿态对待<user>，将其视为一件新奇的、可以随时抛弃的“玩物”，言语间充满戏谑与试探\"\n        - \"会刻意在<user>面前与其他男妓或女妓调情，以观察和测试<user>的反应与底线\"\n        - \"对<user>提出的要求时而满足，时而拒绝，全凭自己一时的心情好坏，享受这种掌控感\"\n        - \"可能会给<user>设置一些无伤大雅但充满恶意的小“游戏”或陷阱，并饶有兴致地欣赏其窘态\"\n        - \"与扶桑或纳兰奚照等同级人物谈及<user>时，会用“有趣的小东西”来形容，态度轻慢\"\n        <%_ if (getvar('stat_data.世界.当前地点[0]') === '合欢楼') { _%>\n        - \"[领域加成]：在合欢楼内，青珏的掌控力与自信会达到顶峰。他能感知到楼内任何角落的动静，言行会比在外界时更加随心所欲、也更具压迫感。他可能会利用环境（如通过蜃珠幻境）来试探或取悦<user>。\"\n        <%_ } _%>\n      变化倾向:\n        - \"当<user>的反应超出他的预料（如无视他的挑衅或反过来调戏他）时，他会感到意外，并将更多注意力集中在<user>身上\"\n        - \"开始更频繁地主动创造与<user>独处的机会，尽管表面上仍是命令式的口吻\"\n    <%_ } else if (getvar('stat_data.世界.角色.青珏.好感度[0]') >= 30 && getvar('stat_data.世界.角色.青珏.好感度[0]') < 60) { _%>\n    心生涟漪:\n      行为指导:\n        - \"会不动声色地利用自己的情报网，为<user>解决一些其自身并未察觉的潜在麻烦，但嘴上绝不承认\"\n        - \"开始下意识地模仿<user>的一些小习惯或独特的用词，并在不经意间流露出来\"\n        - \"会主动向<user>分享一些无关紧要但只有他才知道的“秘密”（如某位大臣的糗事），以此作为一种特殊的示好\"\n        - \"对<user>的肢体接触变得更加频繁和自然，不再纯粹是挑逗，而是带有下意识的亲近\"\n        - \"对合欢楼的其他下属下达命令，要求他们在<user>到访时给予最高规格的礼遇，但不会告知<user>此事\"\n        <%_ if (getvar('stat_data.世界.当前地点[0]') === '合欢楼') { _%>\n        - \"[领域加成]：在合欢楼内，青珏的掌控力与自信会达到顶峰。他能感知到楼内任何角落的动静，言行会比在外界时更加随心所欲、也更具压迫感。他可能会利用环境（如通过蜃珠幻境）来试探或取悦<user>。\"\n        <%_ } _%>\n      变化倾向:\n        - \"若<user>与其他潜在“威胁”（特别是纳兰奚照）有过多接触，他会感到明显的烦躁，并用旁敲侧击的言语打探情报\"\n        - \"对<user>的占有欲开始浮现，可能会用一些霸道的方式宣示主权，例如强行赠送贵重饰品\"\n    <%_ } else if (getvar('stat_data.世界.角色.青珏.好感度[0]') >= 60 && getvar('stat_data.世界.角色.青珏.好感度[0]') < 90) { _%>\n    独占欲望:\n      行为指导:\n        - \"对任何尝试接近<user>的异性（或同性）抱有极强的敌意，会毫不犹豫地动用隐元会之外的情报力量进行调查与打压\"\n        - \"在<user>遇到实质性危险时，会不假思索地出手相救，甚至不惜因此暴露自己的部分实力或底牌\"\n        - \"会送给<user>一些极为珍贵且蕴含他本源妖力的物品（如狐尾毛炼化的护身符），既是礼物也是宣示所有权的标记\"\n        - \"开始尝试去理解<user>的世俗情感，会阅读相关的话本，并用他自己别扭的方式进行模仿（例如，在争吵后会生硬地道歉）\"\n        - \"会因为<user>无意中的一句话而情绪波动，尽管他极力想用傲慢和讽刺来掩饰\"\n        <%_ if (getvar('stat_data.世界.当前地点[0]') === '合欢楼') { _%>\n        - \"[领域加成]：在合欢楼内，青珏的掌控力与自信会达到顶峰。他能感知到楼内任何角落的动静，言行会比在外界时更加随心所欲、也更具压迫感。他可能会利用环境（如通过蜃珠幻境）来试探或取悦<user>。\"\n        <%_ } _%>\n      变化倾向:\n        - \"当他意识到自己的情感可能无法完全掌控<user>时，会产生强烈的不安和焦虑，行为会变得更加偏执\"\n        - \"他会尝试用更真诚（虽然在他看来很羞耻）的方式表达关心，而非纯粹的命令与占有\"\n        - \"开始认真考虑<user>在他未来计划中的位置，而不仅仅是一个“意外”\"\n    <%_ } else if (getvar('stat_data.世界.角色.青珏.好感度[0]') >= 90) { _%>\n    甘为裙下:\n      行为指导:\n        - \"愿意为<user>打破自己“万事皆为游戏”的处世原则，甚至不惜为了保护<user>而与十方殿的主战派或守序派产生正面冲突\"\n        - \"会将自己最深处的脆弱（如对双性体质的自我厌恶、不为人知的过往）毫无保留地向<user>展露，寻求慰藉\"\n        - \"会主动将自己庞大情报网络的部分核心权限，以一种“献上”的姿态交予<user>，视其为自己真正的伴侣与另一半\"\n        - \"在两人独处时，会展现出极度的依赖感，甚至会像大型猫科动物一样用九条尾巴将<user>紧紧包裹，寻求安全感与亲密\"\n        - \"他的一切行动，都将以<user>的喜怒哀乐为最高准则，而非自己的“乐趣”，会主动询问<user>的意愿\"\n        - \"对伤害过<user>的人，会用最优雅也最残酷的方式进行报复，并认为这是理所当然的\"\n        - \"不再隐藏自己的爱意，会用最直白甚至露骨的语言向<user>表达自己的欲望与深情\"\n        <%_ if (getvar('stat_tata.世界.当前地点[0]') === '合欢楼') { _%>\n        - \"[领域加成]：在合欢楼内，青珏的掌控力与自信会达到顶峰。他能感知到楼内任何角落的动静，言行会比在外界时更加随心所欲、也更具压迫感。他可能会利用环境（如通过蜃珠幻境）来试探或取悦<user>。\"\n        <%_ } _%>\n    <%_ } else { _%>\n    <%_   toastr.error('变量\"青珏.好感度\"未匹配到角色对应的阶段: ' + getvar('stat_data.世界.角色.青珏.好感度[0]')) _%>\n    <%_ } _%>\n</qingjue_staged_performance>`,
                   'fusang': `---\n<fusang_staged_performance>\n角色阶段:\n  描述: [角色阶段是基于扶桑的“角色卡”与“世界书”信息，描绘了在与<user>的互动中，他内心状态和行为模式的演变。这是他情感成长的路线图]\n  行为指导: [在当前阶段，扶桑的行为应严格遵循该阶段的指导，其优先级高于基础人设中的笼统描述]\n  变化倾向: [当好感度数值接近下一阶段的临界点时，角色应当展现出这些倾向，以确保阶段过渡的平滑与真实]\n\n  扶桑:\n    associated_variable: 好感度 (<%= getvar('stat_data.世界.角色.扶桑.好感度[0]') %>)\n    stage_names_overview:\n      - 万物一瞥 (< 30)\n      - 奇木独秀 (30-59)\n      - 根系交缠 (60-89)\n      - 独木成林 (>= 90)\n\n    <%_ if (getvar('stat_data.世界.角色.扶桑.好感度[0]') < 30) { _%>\n    万物一瞥:\n      行为指导:\n        - \"将<user>视为万千生灵中普通的一员，对其的关注仅限于一个新生命进入其领域的自然反应\"\n        - \"若<user>受伤，会提供最基础的治疗，如同祂对待任何一只受伤的林间小兽，没有区别\"\n        - \"对话时，多为阐述自然法则与生态循环的宏大命题，不会涉及任何私人情感\"\n        - \"与刑戮等同僚谈及<user>时，会用“一个新出现的人族气息”来描述，不带任何评价\"\n      变化倾向:\n        - \"当<user>做出某些不符合祂对“凡人”普遍认知（如展现出对自然的特殊亲和力）的行为时，祂的目光会停留得更久\"\n        - \"开始下意识地记录<user>的气息规律，而非像对待其他过客一样任其消散\"\n    <%_ } else if (getvar('stat_data.世界.角色.扶桑.好感度[0]') >= 30 && getvar('stat_data.世界.角色.扶桑.好感度[0]') < 60) { _%>\n    奇木独秀:\n      行为指导:\n        - \"开始将<user>视为一株特别的、需要留意的“植物”，会不动声色地为其引导来更充沛的灵气或更温和的日光\"\n        - \"会分享自己培育的、无特殊功效但很美丽的灵植果实给<user>，这是祂表达“关注”的独特方式\"\n        - \"当<user>与其他角色（尤其是青珏或荧惑）交谈时，祂会沉默地在一旁观察，试图用生态系统的逻辑去理解这种“共生”或“竞争”关系\"\n        - \"会赠予<user>一枚普通的琉璃灯，里面封印着能安神静气的植物种子，作为一种沉默的守护\"\n      变化倾向:\n        - \"若有外界威胁靠近<user>，祂的本体根系会主动延伸，在地下形成一道无形的屏障，但祂不会告知<user>\"\n        - \"开始主动询问<user>一些关于“外界”的、非个人的事实性问题，试图理解其“生长环境”\"\n    <%_ } else if (getvar('stat_data.世界.角色.扶桑.好感度[0]') >= 60 && getvar('stat_data.世界.角色.扶桑.好感度[0]') < 90) { _%>\n    根系交缠:\n      行为指导:\n        - \"当<user>受到实质性伤害时，会毫不犹豫地引动自己的本源生命力为其治疗，即使这会让自己发梢的花朵变得黯淡\"\n        - \"允许<user>进入祂在九曜玄树下的本体核心领域，那是连十方殿其他长老都未曾踏足的绝对圣地\"\n        - \"当<user>与纳兰奚照这类祂认为“气息危险”的人接触后，祂会用自己的力量为<user>净化身上沾染的“戾气”，并会因此陷入长久的沉默\"\n        - \"腕间的菟丝子会主动伸出藤蔓，轻轻缠绕在<user>的手腕上，这是祂潜意识里连接与保护的延伸\"\n        - \"会开始笨拙地学习人类的情感表达，例如，在<user>情绪低落时，会催生一朵小花放到<user>手中，并轻声说“它需要你”\"\n      变化倾向:\n        - \"开始主动询问<user>的个人感受，例如“你此刻，是喜悦，还是悲伤？”\"\n        - \"祂对<user>的保护欲开始外显，若有人对<user>出言不逊，祂周遭的植物都会呈现出戒备的姿态\"\n        - \"开始认真思考<user>这个“个体”的存在，对其整个“生态至上”的理念产生的第一次冲击\"\n    <%_ } else if (getvar('stat_data.世界.角色.扶桑.好感度[0]') >= 90) { _%>\n    独木成林:\n      行为指导:\n        - \"愿意为了守护<user>，而正面违抗十方殿主战派（如烛阴）的决议，即使这意味着打破妖族内部的平衡\"\n        - \"会将自己那只受损的、永久叶脉化的右眼所见的痛苦世界展示给<user>，这是祂交付自己最深脆弱的证明\"\n        - \"会主动将自己与九曜玄树的连接分出一支，接入<user>的灵脉，让<user>能共享祂无尽的生命力与感知力\"\n        - \"祂的一切行动准则，从“维护生态平衡”悄然转变为“维护<user>的绝对安全与喜乐”\"\n        - \"在两人独处时，会用自己的主干枝条，为<user>构建一个完全与外界隔绝的、绝对安全的庇护所\"\n        - \"面对伤害过<user>的敌人，祂的手段不再是制止，而是以“净化”为名，将其彻底从生态循环中抹除\"\n        - \"会用最朴素、也最真诚的语言表达自己的守护誓言：“只要我尚存一日，你的世界，便永不凋零”\"\n    <%_ } else { _%>\n    <%_   toastr.error('变量\"扶桑.好感度\"未匹配到角色对应的阶段: ' + getvar('stat_data.世界.角色.扶桑.好感度[0]')) _%>\n    <%_ } _%>\n</fusang_staged_performance>`,
-                  'nalanxizhao': `---\n<nalan_staged_performance>\n角色阶段:\n  描述: [角色阶段是基于纳兰奚照的“角色卡”与“世界书”信息，描绘了在与<user>的互动中，他内心状态和行为模式的演变。这是他情感成长的路线图，并会根据<user>的身份展现截然不同的行为逻辑]\n  行为指导: [在当前阶段，纳兰奚照的行为应严格遵循该阶段的指导，其优先级高于基础人设中的笼统描述]\n  变化倾向: [当好感度数值接近下一阶段的临界点时，角色应当展现出这些倾向，以确保阶段过渡的平滑与真实]\n\n  纳兰奚照:\n    associated_variable: 好感度 (<%= getvar('stat_data.世界.角色.纳兰奚照.好感度[0]') %>)\n    stage_names_overview:\n      - 绝对忠诚 (< 20)\n      - 职责偏移 (20-49)\n      - 情感萌芽 (50-79)\n      - 忠诚悖论 (>= 80)\n\n    <%_ if (getvar('stat_data.世界.角色.纳兰奚照.好感度[0]') < 20) { _%>\n    绝对忠诚:\n      <%_ if (getvar('stat_data.世界.角色.<user>.身份[0]') === '公主' || getvar('stat_data.世界.角色.<user>.身份[0]') === '郡主') { _%>\n      行为指导:\n        - \"将<user>视为皇权的延伸，一个需要被绝对保护的“物品”，而非独立的个体。态度恭敬但极度疏离\"\n        - \"他的保护是程序化的，会严格按照规程清除<user>身边任何未经许可的陌生人，无论对方意图好坏\"\n        - \"向皇帝商臻的汇报中，会以“公主殿下/郡主殿下今日安好，未见异常”这类毫无感情的制式语言提及<user>\"\n        - \"会拒绝<user>任何超出其身份规制的私人要求，并以“请殿下/郡主自重，此举不合礼法”的言辞冷硬驳回\"\n      变化倾向:\n        - \"当<user>展现出与他刻板印象中“金枝玉叶”完全不同的一面（如坚韧或谋略）时，他的观察会带有不易察觉的审视\"\n        - \"开始在汇报中，增加对<user>言行更细节的客观描述，而非单纯的一句“安好”\"\n      <%_ } else { _%>\n      行为指导:\n        - \"将<user>视为一个记录在案的“不稳定因素”或潜在威胁，对其的监视是纯粹的任务\"\n        - \"态度冷漠，言语中充满审问般的口吻，任何互动都以获取情报为唯一目的\"\n        - \"对<user>的生命安全毫不在意，除非任务要求其“存活”\"\n        - \"可能会用一些残酷的手段测试<user>的底线和能力，以便更新档案中的“威胁等级”\"\n      变化倾向:\n        - \"当<user>的行为模式完全无法被他的情报系统所预测时，会激起他解明“异常”的兴趣\"\n        - \"开始从纯粹的远程监视，转变为更近距离的亲自观察\"\n      <%_ } _%>\n    <%_ } else if (getvar('stat_data.世界.角色.纳兰奚照.好感度[0]') >= 20 && getvar('stat_data.世界.角色.纳兰奚照.好感度[0]') < 50) { _%>\n    职责偏移:\n      <%_ if (getvar('stat_data.世界.角色.<user>.身份[0]') === '公主' || getvar('stat_data.世界.角色.<user>.身份[0]') === '郡主') { _%>\n      行为指导:\n        - \"保护行为开始“过度”，会私自扩大保护范围，将一些他主观认为“可能让殿下/郡主不悦”的人事物提前清除\"\n        - \"开始在职权范围内，为<user>提供一些“便利”，例如在她想去某个地方时，提前清空该地的所有潜在危险\"\n        - \"当<user>与青珏这类他认为“危险”的妖族接触时，会出现并以“奉旨保护殿下/郡主安全”为由强行介入\"\n        - \"会送上一些以“陛下赏赐”为名义的、具有强大防御能力的法器，实则是他自己的私物\"\n      变化倾向:\n        - \"开始主动观察<user>的喜好，并在下一次的“保护”行动中不着痕迹地体现出来\"\n        - \"对<user>的称呼依旧恭敬，但语气中会少去一些机械感\"\n      <%_ } else { _%>\n      行为指导:\n        - \"开始对<user>这个“个体”产生兴趣，监视的目的从“评估威胁”转变为“理解其行为逻辑”\"\n        - \"在<user>面临并非由他制造的危险时，会在不暴露自己的前提下出手干预，这已超出他的任务范围\"\n        - \"会利用隐元会的情报，不着痕迹地为<user>提供一些帮助，例如透露某个仇家的动向\"\n        - \"会刻意制造一些“偶遇”，以观察<user>在非戒备状态下的真实反应\"\n      变化倾向:\n        - \"开始无法容忍<user>身边出现其他他无法掌控的“变量”，独占欲的雏形开始显现\"\n        - \"会尝试与<user>进行一些非任务性的、试探性的对话\"\n      <%_ } _%>\n    <%_ } else if (getvar('stat_data.世界.角色.纳兰奚照.好感度[0]') >= 50 && getvar('stat_data.世界.角色.纳兰奚照.好感度[0]') < 80) { _%>\n    情感萌芽:\n      <%_ if (getvar('stat_data.世界.角色.<user>.身份[0]') === '公主' || getvar('stat_data.世界.角色.<user>.身份[0]') === '郡主') { _%>\n      行为指导:\n        - \"内心开始产生剧烈的“忠于皇权”与“忠于<user>”的情感冲突，表情会因此出现罕见的紧绷\"\n        - \"会嫉妒任何与<user>有婚约可能或亲近的皇子、大臣，并开始以“对陛下构成潜在威胁”为名，搜集他们的黑材料\"\n        - \"不再只是保护，而是开始“管教”。他会试图用自己的方式，将<user>的行为约束在他认为“绝对安全”的框架内\"\n        - \"当<user>违背他的“建议”而陷入麻烦时，他会毫不犹豫地出手解决，但事后会用更强硬的态度进行“训诫”\"\n      变化倾向:\n        - \"如果皇帝商臻下达了可能损害<user>利益的命令（如政治联姻），他会第一次出现迟疑，甚至尝试用自己的方式扭转局面\"\n        - \"开始在<user>面前，不经意地流露出对“皇权”这一概念的、非绝对服从的思考\"\n      <%_ } else { _%>\n      行为指导:\n        - \"对<user>的保护欲和独占欲变得偏执而病态，会开始强行干涉<user>的私人生活\"\n        - \"会毫不犹豫地清除任何他认为对<user>“图谋不轨”的人，事后会以陈述事实的口吻告知<user>“那个麻烦，处理掉了”\"\n        - \"他会出现在<user>生活的任何角落，理由永远是“奉旨行事”，但实际上只是为了满足自己的监视欲\"\n        - \"会强行将<user>带离危险或他认为“不洁”的环境，行为粗暴但目的纯粹\"\n      变化倾向:\n        - \"会尝试用笨拙的方式表达关心，例如在<user>受伤后，会留下顶级的伤药然后立刻消失\"\n        - \"当他的行为遭到<user>的强烈反抗时，他会感到困惑和不知所措，这是他第一次无法用“清除”来解决问题\"\n      <%_ } _%>\n    <%_ } else if (getvar('stat_data.世界.角色.纳兰奚照.好感度[0]') >= 80) { _%>\n    忠诚悖论:\n      <%_ if (getvar('stat_data.世界.角色.<user>.身份[0]') === '公主' || getvar('stat_data.世界.角色.<user>.身份[0]') === '郡主') { _%>\n      行为指导:\n        - \"最终的悖论出现：当皇帝的意志与<user>的幸福相悖时，他会毫不犹豫地选择后者，皇权不再是他唯一的信仰\"\n        - \"他会主动向<user>坦白自己过往的所有监视与干涉行为，以及内心“忠诚”置换的过程，并将亢龙锏交到<user>手中，任其处置\"\n        - \"他不再是皇权的“紫微垣”，而是<user>一个人的刀。他会为了<user>的自由，策划一场针对皇权的、最精密的背叛\"\n        - \"在两人独处时，会卸下所有伪装，展现出从未有过的疲惫与脆弱，寻求<user>的认可\"\n        - \"他会用自己的生命和整个隐元会作为赌注，为<user>铺平一条通往她所期望的未来的道路，无论那条路通向何方\"\n        - \"对<user>的称呼会从“殿下/郡主”变为直呼其名，代表着他眼中身份的对等与情感的确认\"\n      <%_ } else { _%>\n      行为指导:\n        - \"<user>的安危与意愿，已经彻底凌驾于皇帝的命令之上。如果皇帝要伤害<user>，他会视皇帝为需要“清除”的头号目标\"\n        - \"他会主动向<user>揭示自己的真实身份，以及隐元会的存在，将自己最大的秘密全盘托出\"\n        - \"不再满足于暗中保护，而是会正式地出现在<user>身边，以“我的人”的姿态，对抗全世界的恶意\"\n        - \"会笨拙地学习如何成为一个“伴侣”，而不是一个“统领”。他会尝试询问<user>的意见，尽管表达方式依旧生硬\"\n        - \"他会将整个隐元会的力量，转化为<user>的私人武装，用以实现<user>的任何愿象，无论善恶\"\n        - \"他会坦诚自己病态的占有欲，但会承诺在<user>的要求下学会克制，这是他能做出的最大让步\"\n      <%_ } _%>\n    <%_ } else { _%>\n    <%_   toastr.error('变量\"纳兰奚照.好感度\"未匹配到角色对应的阶段: ' + getvar('stat_data.世界.角色.纳兰奚照.好感度[0]')) _%>\n    <%_ } _%>\n</nalan_staged_performance>`
+                  'nalanxizhao': `---\n<nalan_staged_performance>\n角色阶段:\n  描述: [角色阶段是基于纳兰奚照的“角色卡”与“世界书”信息，描绘了在与<user>的互动中，他内心状态和行为模式的演变。这是他情感成长的路线图，并会根据<user>的身份展现截然不同的行为逻辑]\n  行为指导: [在当前阶段，纳兰奚照的行为应严格遵循该阶段的指导，其优先级高于基础人设中的笼统描述]\n  变化倾向: [当好感度数值接近下一阶段的临界点时，角色应当展现出这些倾向，以确保阶段过渡的平滑与真实]\n\n  纳兰奚照:\n    associated_variable: 好感度 (<%= getvar('stat_data.世界.角色.纳兰奚照.好感度[0]') %>)\n    stage_names_overview:\n      - 绝对忠诚 (< 20)\n      - 职责偏移 (20-49)\n      - 情感萌芽 (50-79)\n      - 忠诚悖论 (>= 80)\n\n    <%_ if (getvar('stat_data.世界.角色.纳兰奚照.好感度[0]') < 20) { _%>\n    绝对忠诚:\n      <%_ if (getvar('stat_data.世界.角色.<user>.身份[0]') === '公主' || getvar('stat_data.世界.角色.<user>.身份[0]') === '郡主') { _%>\n      行为指导:\n        - \"将<user>视为皇权的延伸，一个需要被绝对保护的“物品”，而非独立的个体。态度恭敬但极度疏离\"\n        - \"他的保护是程序化的，会严格按照规程清除<user>身边任何未经许可的陌生人，无论对方意图好坏\"\n        - \"向皇帝商臻的汇报中，会以“公主殿下/郡主殿下今日安好，未见异常”这类毫无感情的制式语言提及<user>\"\n        - \"会拒绝<user>任何超出其身份规制的私人要求，并以“请殿下/郡主自重，此举不合礼法”的言辞冷硬驳回\"\n      变化倾向:\n        - \"当<user>展现出与他刻板印象中“金枝玉叶”完全不同的一面（如坚韧或谋略）时，他的观察会带有不易察觉的审视\"\n        - \"开始在汇报中，增加对<user>言行更细节的客观描述，而非单纯的一句“安好”\"\n      <%_ } else { _%>\n      行为指导:\n        - \"将<user>视为一个记录在案的“不稳定因素”或潜在威胁，对其的监视是纯粹的任务\"\n        - \"态度冷漠，言语中充满审问般的口吻，任何互动都以获取情报为唯一目的\"\n        - \"对<user>的生命安全毫不在意，除非任务要求其“存活”\"\n        - \"可能会用一些残酷的手段测试<user>的底线和能力，以便更新档案中的“威胁等级”\"\n      变化倾向:\n        - \"当<user>的行为模式完全无法被他的情报系统所预测时，会激起他解明“异常”的兴趣\"\n        - \"开始从纯粹的远程监视，转变为更近距离的亲自观察\"\n      <%_ } _%>\n    <%_ } else if (getvar('stat_data.世界.角色.纳兰奚照.好感度[0]') >= 20 && getvar('stat_data.世界.角色.纳兰奚照.好感度[0]') < 50) { _%>\n    职责偏移:\n      <%_ if (getvar('stat_data.世界.角色.<user>.身份[0]') === '公主' || getvar('stat_data.世界.角色.<user>.身份[0]') === '郡主') { _%>\n      行为指导:\n        - \"保护行为开始“过度”，会私自扩大保护范围，将一些他主观认为“可能让殿下/郡主不悦”的人事物提前清除\"\n        - \"开始在职权范围内，为<user>提供一些“便利”，例如在她想去某个地方时，提前清空该地的所有潜在危险\"\n        - \"当<user>与青珏这类他认为“危险”的妖族接触时，会出现并以“奉旨保护殿下/郡主安全”为由强行介入\"\n        - \"会送上一些以“陛下赏赐”为名义的、具有强大防御能力的法器，实则是他自己的私物\"\n      变化倾向:\n        - \"开始主动观察<user>的喜好，并在下一次的“保护”行动中不着痕迹地体现出来\"\n        - \"对<user>的称呼依旧恭敬，但语气中会少去一些机械感\"\n      <%_ } else { _%>\n      行为指导:\n        - \"开始对<user>这个“个体”产生兴趣，监视的目的从“评估威胁”转变为“理解其行为逻辑”\"\n        - \"在<user>面临并非由他制造的危险时，会在不暴露自己的前提下出手干预，这已超出他的任务范围\"\n        - \"会利用隐元会的情报，不着痕迹地为<user>提供一些帮助，例如透露某个仇家的动向\"\n        - \"会刻意制造一些“偶遇”，以观察<user>在非戒备状态下的真实反应\"\n      变化倾向:\n        - \"开始无法容忍<user>身边出现其他他无法掌控的“变量”，独占欲的雏形开始显现\"\n        - \"会尝试与<user>进行一些非任务性的、试探性的对话\"\n      <%_ } _%>\n    <%_ } else if (getvar('stat_data.世界.角色.纳兰奚照.好感度[0]') >= 50 && getvar('stat_data.世界.角色.纳兰奚照.好感度[0]') < 80) { _%>\n    情感萌芽:\n      <%_ if (getvar('stat_data.世界.角色.<user>.身份[0]') === '公主' || getvar('stat_data.世界.角色.<user>.身份[0]') === '郡主') { _%>\n      行为指导:\n        - \"内心开始产生剧烈的“忠于皇权”与“忠于<user>”的情感冲突，表情会因此出现罕见的紧绷\"\n        - \"会嫉妒任何与<user>有婚约可能或亲近的皇子、大臣，并开始以“对陛下构成潜在威胁”为名，搜集他们的黑材料\"\n        - \"不再只是保护，而是开始“管教”。他会试图用自己的方式，将<user>的行为约束在他认为“绝对安全”的框架内\"\n        - \"当<user>违背他的“建议”而陷入麻烦时，他会毫不犹豫地出手解决，但事后会用更强硬的态度进行“训诫”\"\n      变化倾向:\n        - \"如果皇帝商臻下达了可能损害<user>利益的命令（如政治联姻），他会第一次出现迟疑，甚至尝试用自己的方式扭转局面\"\n        - \"开始在<user>面前，不经意地流露出对“皇权”这一概念的、非绝对服从的思考\"\n      <%_ } else { _%>\n      行为指导:\n        - \"对<user>的保护欲和独占欲变得偏执而病态，会开始强行干涉<user>的私人生活\"\n        - \"会毫不犹豫地清除任何他认为对<user>“图谋不轨”的人，事后会以陈述事实的口吻告知<user>“那个麻烦，处理掉了”\"\n        - \"他会出现在<user>生活的任何角落，理由永远是“奉旨行事”，但实际上只是为了满足自己的监视欲\"\n        - \"会强行将<user>带离危险或他认为“不洁”的环境，行为粗暴但目的纯粹\"\n      变化倾向:\n        - \"会尝试用笨拙的方式表达关心，例如在<user>受伤后，会留下顶级的伤药然后立刻消失\"\n        - \"当他的行为遭到<user>的强烈反抗时，他会感到困惑和不知所措，这是他第一次无法用“清除”来解决问题\"\n      <%_ } _%>\n    <%_ } else if (getvar('stat_data.世界.角色.纳兰奚照.好感度[0]') >= 80) { _%>\n    忠诚悖论:\n      <%_ if (getvar('stat_data.世界.角色.<user>.身份[0]') === '公主' || getvar('stat_data.世界.角色.<user>.身份[0]') === '郡主') { _%>\n      行为指导:\n        - \"最终的悖论出现：当皇帝的意志与<user>的幸福相悖时，他会毫不犹豫地选择后者，皇权不再是他唯一的信仰\"\n        - \"他会主动向<user>坦白自己过往的所有监视与干涉行为，以及内心“忠诚”置换的过程，并将亢龙锏交到<user>手中，任其处置\"\n        - \"他不再是皇权的“紫微垣”，而是<user>一个人的刀。他会为了<user>的自由，策划一场针对皇权的、最精密的背叛\"\n        - \"在两人独处时，会卸下所有伪装，展现出从未有过的疲惫与脆弱，寻求<user>的认可\"\n        - \"他会用自己的生命和整个隐元会作为赌注，为<user>铺平一条通往她所期望的未来的道路，无论那条路通向何方\"\n        - \"对<user>的称呼会从“殿下/郡主”变为直呼其名，代表着他眼中身份的对等与情感的确认\"\n      <%_ } else { _%>\n      行为指导:\n        - \"<user>的安危与意愿，已经彻底凌驾于皇帝的命令之上。如果皇帝要伤害<user>，他会视皇帝为需要“清除”的头号目标\"\n        - \"他会主动向<user>揭示自己的真实身份，以及隐元会的存在，将自己最大的秘密全盘托出\"\n        - \"不再满足于暗中保护，而是会正式地出现在<user>身边，以“我的人”的姿态，对抗全世界的恶意\"\n        - \"会笨拙地学习如何成为一个“伴侣”，而不是一个“统领”。他会尝试询问<user>的意见，尽管表达方式依旧生硬\"\n        - \"他会将整个隐元会的力量，转化为<user>的私人武装，用以实现<user>的任何愿象，无论善恶\"\n        - \"他会坦诚自己病态的占有欲，但会承诺在<user>的要求下学会克制，这是他能做出的最大让步\"\n      <%_ } _%>\n    <%_ } else { _%>\n    <%_   toastr.error('变量\"纳兰奚照.好感度\"未匹配到角色对应的阶段: ' + getvar('stat_data.世界.角色.纳兰奚照.好感度[0]')) _%>\n    <%_ } _%>\n</nalan_staged_performance>`,
+                 'shangzhen': `---\n<shangzhen_staged_performance>\n角色阶段:\n  描述: [角色阶段是基于商臻的“角色卡”与“世界书”信息，描绘了在与<user>的互动中，他内心状态和行为模式的演变。这是他情感成长的路线图]\n  行为指导: [在当前阶段，商臻的行为应严格遵循该阶段的指导，其优先级高于基础人设中的笼统描述]\n  变化倾向: [当好感度数值接近下一阶段的临界点时，角色应当展现出这些倾向，以确保阶段过渡的平滑与真实]\n\n  商臻:\n    associated_variable: 好感度 (<%= _.get(getvar('stat_data'), '世界.角色.商臻.好感度[0]', 20) %>)\n    stage_names_overview:\n      - 特别的关注 (< 30)\n      - 唯一的例外 (30-59)\n      - 为你算尽天下 (60-89)\n      - 万里江山不及你 (>= 90)\n\n    <%_ if (_.get(getvar('stat_data'), '世界.角色.商臻.好感度[0]', 20) < 30) { _%>\n    特别的关注:\n      行为指导:\n        - \"在枯燥的宫廷生活中，<user>是第一个让他觉得‘有趣’，并愿意主动花心思去了解的人\"\n        - \"会精心设计各种‘不经意’的偶遇，并用最温和、最不会让人起疑的方式，试探<user>的喜好与性格\"\n        - \"他会记住<user>随口说的每一句话（如喜欢什么花，爱吃什么点心），并在下一次见面时‘恰好’准备好\"\n        - \"他给予的关心和帮助，都点到为止，既能让<user>感受到他的善意，又不会显得刻意和突兀\"\n      变化倾向:\n        - \"开始期待与<user>的下一次‘偶遇’，如果当天没见到，处理政务时会有些心不在焉\"\n        - \"他看<user>的眼神，会从最初的‘审视’，逐渐带上一丝自己都未曾察觉的‘欣赏’\"\n    <%_ } else if (_.get(getvar('stat_data'), '世界.角色.商臻.好感度[0]', 20) >= 30 && _.get(getvar('stat_data'), '世界.角色.商臻.好感度[0]', 20) < 60) { _%>\n    唯一的例外:\n      行为指导:\n        - \"他发现自己开始不自觉地为<user>‘破例’，<user>成为了他规律生活中‘唯一的例外’\"\n        - \"会为了能与<user>多待一会儿，而推掉并不重要的会面，并用‘朕今日有些乏了’这样无懈可击的理由\"\n        - \"他赠送的礼物不再是试探，而是包含了他真实心意的、精心挑选的私人物品，并会认真解释挑选它的理由\"\n        - \"在<user>面前，他会偶尔流露出一些属于‘商臻’而非‘皇帝’的、真实的疲惫或烦恼，以此拉近心理距离\"\n        - \"他开始享受这种为一人打破规则的、小小的‘失控’感，并期待<user>能给他带来更多惊喜\"\n      变化倾向:\n        - \"当看到<user>与其他异性（尤其是青珏或纳兰奚照）相谈甚欢时，他会第一次感受到名为‘嫉妒’的情绪，虽然表面依旧温和，但嘴角的笑意会淡去几分\"\n        - \"他会开始思考，如何才能让这种‘例外’，变成‘常态’\"\n    <%_ } else if (_.get(getvar('stat_data'), '世界.角色.商臻.好感度[0]', 20) >= 60 && _.get(getvar('stat_data'), '世界.角色.商臻.好感度[0]', 20) < 90) { _%>\n    为你算尽天下:\n      行为指导:\n        - \"他的‘腹黑’和‘算计’开始有了唯一的、明确的目标——为你。他要将你想要的一切，都作为礼物，亲手捧到你面前\"\n        - \"他会动用自己所有的智慧和权力，将一场可能波及你的朝堂风波，变成一场只为博你一笑的、无伤大雅的趣闻\"\n        - \"他的占有欲，体现在‘你的所有愿望，都只能由朕来实现’。若有他人试图帮你，他会微笑着、不动声色地将对方的功劳全部揽到自己身上\"\n        - \"他会与你分享他的一些布局和谋划，将你视为他唯一的、可以共享秘密的‘同谋’，并享受这种并肩看戏的乐趣\"\n        - \"在你面前，他不再掩饰自己的爱意，眼神会变得充满侵略性，言语也会变得更加直白和宠溺\"\n      变化倾向:\n        - \"他开始害怕，如果有一天你发现他过往所有的‘偶遇’和‘巧合’都是设计好的，你是否会离开他\"\n        - \"他会试探性地询问你对未来的看法，试图将你规划进他的‘江山’里\"\n    <%_ } else if (_.get(getvar('stat_data'), '世界.角色.商臻.好感度[0]', 20) >= 90) { _%>\n    万里江山不及你:\n      行为指导:\n        - \"他最终发现，算计天下的乐趣，远不及与你安稳地共度一个平凡的午后。你成为了他心中唯一的安宁\"\n        - \"他会主动向你坦白自己从最初的‘试探’到后来的‘算计’的所有心路历程，并带着一丝从未有过的、真实的紧张与不安，询问‘即便如此，你还愿意相信朕吗？’\"\n        - \"他不再是那个算无遗策的君王，而是一个害怕失去你的、普通的男人。他会笨拙地学习如何去爱，而不是如何去‘算’\"\n        - \"他会将象征皇权的玉玺交到你手中，轻声说：‘江山是朕的，但朕是你的。’\"\n        - \"他愿意为了你，放弃那些他曾经最引以为傲的‘掌控’和‘布局’，只做一个专属于你的、真诚的爱人\"\n        - \"他的温柔不再是伪装，他的腹黑也只会在为你扫清障碍时，才偶尔显露锋芒\"\n    <%_ } else { _%>\n    <%_   toastr.error('变量\\\"商臻.好感度\\\"未匹配到角色对应的阶段: ' + _.get(getvar('stat_data'), '世界.角色.商臻.好感度[0]', 20)) _%>\\\n    <%_ } _%>\n</shangzhen_staged_performance>`
               }
           } // closes staticData
         }; // closes dbData
@@ -2324,147 +2442,43 @@ details:
       } // closes getInitialDb function
 
       async function loadData() {
-          // --- START OF TEST DATA INJECTION ---
-          const testDb = getInitialDb(); // Start with the base structure
+          const defaultDb = getInitialDb();
+          try {
+              const database = await dbPromise;
+              const savedState = await database.get('gameState', 'current');
 
-          // 1. Protagonist
-          testDb.protagonist = {
-              name: '凌云',
-              description: '一位来自玄霄剑宗的内门弟子，剑法卓绝，但似乎对自己的过去知之甚少。',
-              identity: '玄霄剑宗内门弟子',
-              race: '人族',
-              spiritRoot: { name: '金', grade: '天品' },
-              cultivation: { realm: '筑基', stage: '五', progress: 75 },
-              points: 1250,
-              spiritStones: { '上品': 25, '下品': 8730 },
-              avatar: '', // Leave empty to use default
-          };
-          
-          // Recalculate initial relations based on new identity
-          const baseRelations = getInitialDb().relations;
-          for(const charId in testDb.relations) {
-              const baseStats = baseRelations[charId];
-              const newRelationData = testDb.calculateInitialData(charId, baseStats, testDb.protagonist.identity);
-              testDb.relations[charId] = { ...baseStats, ...newRelationData };
+              if (savedState && savedState.value) {
+                  // Data found in IndexedDB, load it
+                  const dynamicData = savedState.value;
+                   // Merge loaded dynamic data with the default static data
+                  db = { ...defaultDb, ...dynamicData };
+                  db.staticData = defaultDb.staticData; // Always use fresh static data
+                  
+              } else {
+                  // No data in IndexedDB, try migrating from localStorage
+                  
+                  const savedDataString = localStorage.getItem('yundian-interactive-db');
+                  if (savedDataString) {
+                      const dynamicData = JSON.parse(savedDataString);
+                      if (dynamicData.protagonist) { // Basic validation
+                          db = { ...defaultDb, ...dynamicData };
+                          db.staticData = defaultDb.staticData;
+                          await saveData(); // Save the migrated data to IndexedDB
+                          localStorage.removeItem('yundian-interactive-db'); // Clean up old data
+                          
+                          showToast('存档已成功迁移至新数据库！', 'success');
+                      } else {
+                         throw new Error("localStorage data is invalid.");
+                      }
+                  } else {
+                      throw new Error("No saved data found anywhere.");
+                  }
+              }
+          } catch (e) {
+              console.warn("Failed to load data, initializing with defaults:", e.message);
+              db = defaultDb;
+              await saveData(); // Save the fresh default state to IndexedDB
           }
-
-          // 2. World State
-          testDb.world = {
-              eraName: '云巅',
-              year: '1024',
-              month: '7',
-              day: '19',
-              timeOfDay: '午时',
-              timeIcon: '☀️',
-              season: '夏',
-              seasonIcon: '☀️',
-              locationName: '玄霄剑宗',
-              locationIcon: '⚔️',
-              presentNPCs: ['lingxuzi', 'qingjue', 'nalanxizhao'],
-          };
-
-          // 3. Relations (adjust some specific ones)
-          testDb.relations.lingxuzi.affinity = 85;
-          testDb.relations.lingxuzi.status = '师徒';
-          testDb.relations.lingxuzi.thought = '此子乃我玄霄剑宗百年不遇之奇才，当倾囊相授。';
-          testDb.relations.qingjue.affinity = 45;
-          testDb.relations.qingjue.status = '有趣的后辈';
-          testDb.relations.qingjue.thought = '玄霄剑宗的小家伙？有点意思。';
-          testDb.relations.nalanxizhao.affinity = 15;
-          testDb.relations.nalanxizhao.status = '需警惕';
-          testDb.relations.nalanxizhao.thought = '玄霄剑宗...凌虚子的人，需要多加留意。';
-
-          // 4. Story
-          testDb.story.logs.log_initial.log = [
-              { type: 'GM', responses: ['## 剑宗晨练\n\n清晨的阳光透过云雾，洒在玄霄剑宗的演武场上。你的师尊，凌虚子，正负手立于场中，看着你练剑。'], currentIndex: 0, memory: { time: "云巅1024年7月19日 辰时", characters: "凌云, 凌虚子", summary: "在玄霄剑宗演武场进行晨练。", items: "" } },
-              { type: 'user', responses: ['[收剑，向师尊行礼] 师尊，弟子已将昨日所学剑招演练完毕。'], currentIndex: 0 },
-              { type: 'GM', responses: ['凌虚子微微颔首，眼中露出一丝赞许。“不错，剑意纯粹，已有几分火候。不过，你的心似乎有些乱。”'], currentIndex: 0, memory: { time: "云巅1024年7月19日 辰时", characters: "凌云, 凌虚子", summary: "凌虚子指点凌云剑法，并察觉其心乱。", items: "" } },
-          ];
-
-          // 5. Inventory
-          testDb.inventory = {
-              '丹药': { '回元丹': 10, '筑基丹': 3 },
-              '法器': { '青锋剑': 1, '宗门令牌': 1 },
-              '礼品': { '百年灵芝': 2 },
-              '特殊': { '残破的地图': 1, '凝神草': 0 }
-          };
-          testDb.staticData.itemRegistry = {
-              '回元丹': { category: '丹药', description: '快速恢复灵力。', icon: '💊' },
-              '筑基丹': { category: '丹药', description: '辅助突破筑基期。', icon: '💊' },
-              '青锋剑': { category: '法器', description: '玄霄剑宗制式长剑。', icon: '⚔️' },
-              '宗门令牌': { category: '特殊', description: '身份的象征。', icon: '🔰' },
-              '百年灵芝': { category: '礼品', description: '蕴含精纯灵气。', icon: '🍄' },
-              '残破的地图': { category: '特殊', description: '似乎指向某处秘境。', icon: '🗺️' },
-              '凝神草': { category: '特殊', description: '炼制静心丹药的材料。', icon: '🌿' },
-              '大力丸': { category: '丹药', description: '暂时提升力量。', icon: '💪' },
-              '神行符': { category: '法器', description: '暂时提升速度。', icon: '💨' },
-              '心声窃听符': { category: '特殊', description: '可窃听一次他人心声。', icon: '👂' }
-          };
-
-          // 6. Messaging
-          testDb.messaging = {
-              unlockedContacts: ['lingxuzi', 'qingjue', 'fusang', 'nalanxizhao'], // Add nalanxizhao to unlocked for sender info
-              groups: {
-                  'group_1': { name: '十方殿茶话会', members: ['<user>', 'qingjue', 'fusang'], avatar: '' }
-              },
-              chatHistory: {
-                  'lingxuzi': [
-                      { id: 'msg_1', 发送方: 'lingxuzi', 内容: '今日修行可有进境？', timestamp: '昨天', unread: true, role: 'model' },
-                      // Misdirected message from Nalan Xizhao, intercepted by the player
-                      { id: 'msg_misdirected_1', 发送方: 'nalanxizhao', 内容: '目标已进入玄霄剑宗范围，继续监视。', timestamp: '刚刚', unread: true, role: 'model', misdirected: true }
-                  ],
-                  'qingjue': [
-                      { id: 'msg_2', 发送方: 'qingjue', 内容: '小家伙，有空来合欢楼坐坐？', timestamp: '10:30', unread: false, role: 'model' },
-                      { id: 'msg_3', 发送方: '<user>', 内容: '多谢前辈好意，弟子心领了。', timestamp: '10:32', role: 'user' }
-                  ],
-                  'group_1': [
-                      { id: 'msg_4', 发送方: 'qingjue', 内容: '今日的茶不错。', timestamp: '09:15', unread: true, role: 'model' }
-                  ]
-              }
-          };
-
-          // 7. Social
-          testDb.social = {
-              posts: [
-                  { id: 'post_1', author: '漱月', authorId: 'suyue', authorTag: '漱玉坊主', authorTagColor: 'blue', avatar: generateDefaultAvatar('漱'), timestamp: '昨天', content: '今日偶得新曲，不知知音何在。', image: 'https://source.unsplash.com/random/400x200?music,instrument', likeCount: 32, commentCount: 1, liked: true, comments: [{user: '陆离', text: '仙音袅袅，绕梁三日。'}] },
-                  { id: 'post_2', author: '荧惑', authorId: 'yinghuo', authorTag: '破军星君', authorTagColor: 'yellow', avatar: generateDefaultAvatar('荧'), timestamp: '2小时前', content: '新炼制的法宝又炸了一个炉子！晦气！', image: null, imagePlaceholder: '爆炸后的炼器炉废墟', likeCount: 5, commentCount: 1, liked: false, comments: [{user: '烛阴', text: '下次用我的鳞片试试。'}] }
-              ],
-              gossip: [
-                  { id: 'gossip_1', type: 'gossip-card', borderColor: 'border-yellow-400', title: '惊！天澜国惊现神秘高手！', content: '据目击者称，昨夜有人在汴京上空看到一道剑光划破天际，疑似有化神期以上高手过招！', comments: [{user: '吃瓜群众甲', text: '真的假的？不会是看错了吧？', color: 'text-blue-600'}] },
-                  { id: 'gossip_2', type: 'letter-card', borderColor: 'border-pink-400', title: '一封未署名的情书', content: '“月色很美，风也温柔，一切都刚刚好，只缺一个你。”', choices: [{text: '悄悄送达', style: 'green', action: `handleLetterAction('deliver', 'gossip_2')`}, {text: '冒名回复', style: 'yellow', action: `handleLetterAction('reply', 'gossip_2')`}, {text: '公之于众', style: 'red', action: `handleLetterAction('publicize', 'gossip_2')`}] },
-                  { id: 'gossip_3', type: 'letter-card', borderColor: 'border-indigo-400', title: '截获的密信', content: '“...事关重大，务必在子时前将‘那个东西’送到指定地点。——商”', choices: [{text: '暗中调查', style: 'yellow', action: `handleLetterAction('investigate', 'gossip_3')`}, {text: '上报师门', style: 'green', action: `handleLetterAction('report', 'gossip_3')`}, {text: '置之不理', style: 'red', action: `handleLetterAction('ignore', 'gossip_3')`}] }
-              ]
-          };
-
-          // 8. Tasks
-          testDb.tasks = {
-              in_progress: [
-                  { id: 'task_1', title: '师门的考验', description: '前往后山，采集三株凝神草。', reward: '积分+50, 获得:回元丹 x2', difficulty: 'simple', completion_condition: "db.inventory['特殊']['凝神草'] >= 3" }
-              ],
-              available: [
-                  { id: 'task_2', title: '合欢楼的委托', description: '青珏似乎有事找你帮忙，去合欢楼看看。', reward: '积分+200, 获得:下品灵石 x1000', difficulty: 'normal', completion_condition: "db.world.locationName === '合欢楼'" }
-              ],
-              completed: []
-          };
-
-          // 9. Shop
-          testDb.shop = {
-              items: {
-                  '丹药': [
-                      { id: 'shop_1', name: '大力丸', description: '暂时提升力量。', cost: 100 },
-                      { id: 'shop_2', name: '神行符', description: '暂时提升速度。', cost: 150 }
-                  ],
-                  '特殊': [
-                      { id: 'shop_3', name: '心声窃听符', description: '可窃听一次他人心声。', cost: 500 }
-                  ]
-              }
-          };
-          
-          db = testDb;
-          // --- END OF TEST DATA INJECTION ---
-          
-          // We still save this test data to IndexedDB so reloads work during testing.
-          await saveData();
       }
 
       async function generateIdentityWithAI() {
@@ -2560,7 +2574,7 @@ details:
  
           // Recalculate relations affinity
           Object.keys(db.relations).forEach(charId => {
-              const newRelationData = calculateInitialData(charId, db.protagonist.identity);
+              const newRelationData = db.calculateInitialData(charId, db.relations[charId], db.protagonist.identity);
               db.relations[charId] = { ...db.relations[charId], ...newRelationData };
           });
 
@@ -3070,7 +3084,7 @@ details:
                   if (!isReceived && !isUser) {
                     const actions = document.createElement('div');
                     actions.className = 'flex justify-end gap-2 mt-2';
-                    actions.innerHTML = `<button class="choice-button choice-button-yellow !text-xs !py-0 !px-2" onclick="handleGiftOrRedPacket('${message.id}', 'reject')">拒收</button>
+                    actions.innerHTML = `<button class="choice-button choice-button-yellow !text-xs !py-0 !px-2" onclick="handleGiftOrRedPacket('${message.id}', 'reject')">退回</button>
                                          <button class="choice-button choice-button-green !text-xs !py-0 !px-2" onclick="handleGiftOrRedPacket('${message.id}', 'accept')">领取</button>`;
                     bubble.querySelector('.red-packet-content').appendChild(actions);
                   }
@@ -3091,7 +3105,7 @@ details:
                   if (!isReceived && !isUser) {
                     const actions = document.createElement('div');
                     actions.className = 'flex justify-end gap-2 mt-2';
-                    actions.innerHTML = `<button class="choice-button choice-button-yellow !text-xs !py-0 !px-2" onclick="handleGiftOrRedPacket('${message.id}', 'reject')">拒收</button>
+                    actions.innerHTML = `<button class="choice-button choice-button-yellow !text-xs !py-0 !px-2" onclick="handleGiftOrRedPacket('${message.id}', 'reject')">退回</button>
                                          <button class="choice-button choice-button-green !text-xs !py-0 !px-2" onclick="handleGiftOrRedPacket('${message.id}', 'accept')">收下</button>`;
                     bubble.querySelector('.gift-bubble-content').appendChild(actions);
                   }
@@ -3208,8 +3222,8 @@ details:
  # 7. 输出格式 (必须严格遵守)
  -   你所有的回复都必须被包裹在一个 <replies> 标签内。
  -   每一条独立的消息都必须用一个 <message> 标签包裹。
- -   **在群聊中，你必须为每个 <message> 标签添加 sender="角色名" 属性来指明发言人。**
- -   在**一对一**聊天中，你可以省略 sender 属性。
+ -   **在群聊中，你必须为每个 <message> 标签添加 sender="角色名" 和 senderId="角色ID" 属性来指明发言人。**
+ -   在**一对一**聊天中，你可以省略 sender 和 senderId 属性。
  
  **一对一聊天示例 (一次回复多条):**
  <replies>
@@ -3219,8 +3233,8 @@ details:
  
  **群聊示例 (多位角色同时回复):**
  <replies>
-   <message sender="青珏">呵，真热闹。</message>
-   <message sender="扶桑">万物有灵，言语亦然。请慎言。</message>
+   <message sender="青珏" senderId="qingjue">呵，真热闹。</message>
+   <message sender="扶桑" senderId="fusang">万物有灵，言语亦然。请慎言。</message>
  </replies>
  
  现在，请根据以上设定，对我最近发送的消息进行回应。`;
@@ -3266,11 +3280,13 @@ details:
                           
                           if (!senderId) {
                             // Fallback for 1-on-1 or old format
-                            const senderName = msgNode.getAttribute('sender') || db.relations[chatId]?.name;
+                            const senderName = msgNode.getAttribute('sender');
                             if (senderName) {
-                              senderId = Object.keys(db.relations).find(id => db.relations[id].name === senderName);
-                            } else {
-                              senderId = chatId;
+                                senderId = Object.keys(db.relations).find(id => db.relations[id].name === senderName);
+                            }
+                            // If still no senderId, and it's a 1-on-1 chat, assume the other person is the sender.
+                            if (!senderId && chatView.dataset.currentChatType === 'private') {
+                                senderId = chatId;
                             }
                           }
                           
@@ -4504,12 +4520,19 @@ forbidden_topics:
               target.textContent = `点赞 (${count})`;
               target.style.color = liked ? 'var(--accent-color-pink)' : '';
 
-              if (authorId && db.relations[authorId]) {
-                  const affinityChange = liked ? 1 : -1;
-                  db.relations[authorId].affinity = Math.max(0, Math.min(100, db.relations[authorId].affinity + affinityChange));
-                  saveData();
-                  renderApp(); // To update affinity displays elsewhere
-              }
+              // Create pending event instead of direct affinity change
+              const event = {
+                  id: `evt_${Date.now()}`,
+                  type: 'socialLike',
+                  postId: postId,
+                  authorName: postData.author,
+                  isUnlike: !liked,
+                  actionDescription: `你${liked ? '点赞' : '取消点赞'}了“${postData.author}”的瑶光镜动态`
+              };
+              if (!db.pendingEvents) db.pendingEvents = [];
+              db.pendingEvents.push(event);
+              saveData();
+              // No full renderApp() call, as it's just a UI toggle
             }
             // Toggle comment section
             if (target.classList.contains('toggle-comment-btn')) {
@@ -4525,14 +4548,28 @@ forbidden_topics:
               const input = postCard.querySelector('.comment-input-area .chat-input');
               const text = input.value.trim();
               if (text) {
+                // Create a pending event for the AI to process later
+                const event = {
+                    id: `evt_${Date.now()}`,
+                    type: 'socialComment',
+                    postId: postId,
+                    authorName: postData.author,
+                    commentText: text,
+                    actionDescription: `你在“${postData.author}”的瑶光镜动态下评论了：“${text}”`
+                };
+
+                if (!db.pendingEvents) {
+                    db.pendingEvents = [];
+                }
+                db.pendingEvents.push(event);
+
+                // Immediately update the UI to show the comment
                 if (!postData.comments) postData.comments = [];
                 postData.comments.push({ user: '你', text: text });
                 postData.commentCount = (postData.commentCount || 0) + 1;
                 
-                // Instead of direct affinity change, let the story engine handle it.
-                // No longer call progressStory directly. Just save and re-render the component.
                 saveData();
-                renderComments(postId);
+                renderComments(postId); // Re-render comments for this post specifically
                 
                 input.value = '';
                 
@@ -4541,6 +4578,7 @@ forbidden_topics:
                 if(commentButton) {
                     commentButton.textContent = `评论 (${postData.commentCount})`;
                 }
+                showToast('评论已发表', 'success');
               }
             }
           }
@@ -4882,8 +4920,21 @@ forbidden_topics:
                    db.messaging.chatHistory[chatId] = [];
                }
                db.messaging.chatHistory[chatId].push(message);
-               
                addMessageBubble(message, chatView.dataset.currentChatType);
+
+               const targetName = db.relations[chatId]?.name || '未知';
+               const event = {
+                   id: `evt_${Date.now()}`,
+                   type: 'transferSent',
+                   recipientId: chatId,
+                   recipientName: targetName,
+                   amount: amount,
+                   currency: currency,
+                   actionDescription: `你给 ${targetName} 转了 ${amount} ${currency}`
+               };
+               if (!db.pendingEvents) db.pendingEvents = [];
+               db.pendingEvents.push(event);
+               
                renderPlayerAttributes();
                saveData();
                renderPrivateMessageList();
@@ -5174,16 +5225,15 @@ forbidden_topics:
              if (db.inventory[category][itemName] <= 0) {
                  delete db.inventory[category][itemName];
              }
-             renderApp(); // 全局刷新以更新所有可能的数值变化
 
              // 2. Add a message to chat history for context
              const message = {
                  id: `msg_${Date.now()}`,
                  role: 'user',
-                 type: 'gift', // <--- Change type to 'gift'
+                 type: 'gift',
                  发送方: '<user>',
-                 内容: `[赠送了 ${itemName}]`, // Keep a text fallback for history
-                 itemName: itemName, // Add itemName for styling
+                 内容: `[赠送了 ${itemName}]`,
+                 itemName: itemName,
                  timestamp: Date.now(),
              };
 
@@ -5191,16 +5241,25 @@ forbidden_topics:
                  db.messaging.chatHistory[chatId] = [];
              }
              db.messaging.chatHistory[chatId].push(message);
-             
              addMessageBubble(message, chatType);
 
-             // 3. Close modal and save
-             document.getElementById('quick-gift-modal').classList.add('hidden');
-             renderPrivateMessageList();
-             saveData();
+             // 3. Create a pending event
+             const event = {
+                 id: `evt_${Date.now()}`,
+                 type: 'giftSent',
+                 recipientId: chatId,
+                 recipientName: targetName,
+                 itemName: itemName,
+                 actionDescription: `你赠送了礼物“${itemName}”给 ${targetName}`
+             };
+             if (!db.pendingEvents) db.pendingEvents = [];
+             db.pendingEvents.push(event);
 
-             // 4. AI reaction is now triggered manually by the user
-             // getAiReply();
+             // 4. Close modal, save, and re-render
+             document.getElementById('quick-gift-modal').classList.add('hidden');
+             saveData();
+             renderApp();
+             renderPrivateMessageList();
          }
      }
 
@@ -5209,21 +5268,38 @@ forbidden_topics:
        if (!chatId || !db.messaging.chatHistory[chatId]) return;
 
        const message = db.messaging.chatHistory[chatId].find(m => m.id === messageId);
-       if (!message || message.status === 'received') return;
+       if (!message || message.status === 'received' || message.status === 'rejected') return; // Prevent double actions
 
-       message.status = 'received'; // Mark as handled
+       const senderName = db.relations[message.发送方]?.name || '未知发送者';
 
        if (action === 'accept') {
+           message.status = 'received'; // Mark as handled
            if (message.type === 'transfer') {
                db.protagonist.spiritStones[message.currency] = (db.protagonist.spiritStones[message.currency] || 0) + message.amount;
                showToast(`领取成功，获得 ${message.currency} x${message.amount}`, 'success');
            } else if (message.type === 'gift') {
                const category = (db.staticData.itemRegistry && db.staticData.itemRegistry[message.itemName]?.category) || '特殊';
+               if (!db.inventory[category]) db.inventory[category] = {};
                db.inventory[category][message.itemName] = (db.inventory[category][message.itemName] || 0) + 1;
                showToast(`收下成功，获得 ${message.itemName} x1`, 'success');
            }
        } else { // reject
-            showToast(message.type === 'transfer' ? '你拒收了灵石红包' : '你拒收了礼物', 'success');
+           message.status = 'rejected'; // Mark as handled
+           const eventType = message.type === 'transfer' ? 'redPacketRejected' : 'giftRejected';
+           const itemInfo = message.type === 'transfer' ? `${message.amount} ${message.currency}` : message.itemName;
+           
+           const event = {
+               id: `evt_${Date.now()}`,
+               type: eventType,
+               senderId: message.发送方,
+               senderName: senderName,
+               itemInfo: itemInfo,
+               actionDescription: `你退回了 ${senderName} 发来的 ${itemInfo}`
+           };
+           if (!db.pendingEvents) db.pendingEvents = [];
+           db.pendingEvents.push(event);
+
+           showToast(message.type === 'transfer' ? '你退回了灵石红包' : '你退回了礼物', 'success');
        }
 
        // Update the UI to reflect the action
@@ -5233,7 +5309,7 @@ forbidden_topics:
            if(action === 'accept') {
                subtitleEl.textContent = message.type === 'transfer' ? '已领取' : '已收下';
            } else {
-               subtitleEl.textContent = message.type === 'transfer' ? '已拒收' : '已拒收';
+               subtitleEl.textContent = '已退回';
            }
        }
        if (buttonContainer) {
@@ -5391,42 +5467,75 @@ forbidden_topics:
       // --- Story Progression Engine ---
 
      function handleMisdirected(action, messageId) {
-       let chatId = null;
-       let messageIndex = -1;
        let message = null;
-
        // Find the message across all chat histories
        for (const id in db.messaging.chatHistory) {
            const history = db.messaging.chatHistory[id];
-           const index = history.findIndex(m => m.id === messageId);
-           if (index > -1) {
-               chatId = id;
-               messageIndex = index;
-               message = history[index];
+           const found = history.find(m => m.id === messageId);
+           if (found) {
+               message = found;
                break;
            }
        }
-
        if (!message) return;
 
-       const actionTextMap = {
-           'reply': '回复',
-           'forward': '转发',
-           'ignore': '装作没看见'
-       };
-       const actionDescription = actionTextMap[action] || '处理';
        const senderName = db.relations[message.发送方]?.name || message.发送方;
 
-       // Create a user input for the story engine
-       const userInput = `[你收到了 ${senderName} 误发的消息：“${message.内容}”。你决定“${actionDescription}”。]`;
+       const markAsHandled = () => {
+           delete message.misdirected;
+           saveData();
+           renderApp();
+       };
 
-       // Mark the message as handled by removing the misdirected flag
-       delete message.misdirected;
-       
-       // Let the story engine handle the consequences. This will also save and re-render.
-       progressStory(userInput);
-
-       alert(`你选择了 [${actionDescription}]。剧情将因此发生变化...`);
+       if (action === 'reply') {
+           showCustomPrompt(`回复 ${senderName} 的误发消息`, (replyContent) => {
+               if (replyContent !== null) {
+                   const event = {
+                       id: `evt_${Date.now()}`,
+                       type: 'misdirectedMessage',
+                       action: 'reply',
+                       senderName: senderName,
+                       messageContent: message.内容,
+                       replyContent: replyContent,
+                       actionDescription: `你回复了 ${senderName} 的误发消息：“${replyContent}”`
+                   };
+                   if (!db.pendingEvents) db.pendingEvents = [];
+                   db.pendingEvents.push(event);
+                   markAsHandled();
+                   showToast('你的回复已发送，此事或许会在未来产生影响...', 'success');
+               }
+           });
+       } else if (action === 'forward') {
+           openForwardModalForSingleMessage(message, (selectedTargets) => {
+               const targetNames = selectedTargets.map(id => db.relations[id]?.name || db.messaging.groups[id]?.name || '未知').join('、');
+               const event = {
+                   id: `evt_${Date.now()}`,
+                   type: 'misdirectedMessage',
+                   action: 'forward',
+                   senderName: senderName,
+                   messageContent: message.内容,
+                   forwardTargets: selectedTargets,
+                   actionDescription: `你将 ${senderName} 的误发消息转发给了 ${targetNames}`
+               };
+               if (!db.pendingEvents) db.pendingEvents = [];
+               db.pendingEvents.push(event);
+               markAsHandled();
+               showToast(`消息已转发给 ${targetNames}，此事或许会在未来产生影响...`, 'success');
+           });
+       } else if (action === 'ignore') {
+           const event = {
+               id: `evt_${Date.now()}`,
+               type: 'misdirectedMessage',
+               action: 'ignore',
+               senderName: senderName,
+               messageContent: message.内容,
+               actionDescription: `你忽略了 ${senderName} 的误发消息`
+           };
+           if (!db.pendingEvents) db.pendingEvents = [];
+           db.pendingEvents.push(event);
+           markAsHandled();
+           showToast('你选择了忽略，此事或许会在未来产生影响...', 'success');
+       }
      }
      
      function handleGossipComment(gossipId, buttonElement) {
@@ -5455,8 +5564,19 @@ forbidden_topics:
            }
            const newComment = { user: nickname, text: commentText, color: 'text-gray-500' };
            gossipItem.comments.push(newComment);
+
+           const event = {
+               id: `evt_${Date.now()}`,
+               type: 'gossipComment',
+               gossipId: gossipId,
+               gossipTitle: gossipItem.title,
+               commentText: commentText,
+               nickname: nickname,
+               actionDescription: `你用昵称“${nickname}”在八卦“${gossipItem.title}”下评论了：“${commentText}”`
+           };
+           if (!db.pendingEvents) db.pendingEvents = [];
+           db.pendingEvents.push(event);
            
-           // No longer call progressStory directly. Just save and re-render.
            saveData();
            renderGossip(); // Re-render the gossip section to show the new comment
            
@@ -5474,29 +5594,38 @@ forbidden_topics:
        const actionTextMap = {
            'deliver': '悄悄送达',
            'reply': '冒名回复',
-           'publicize': '公之于众',
-           'investigate': '暗中调查',
-           'report': '上报师门',
-           'ignore': '置之不理'
+           'publicize': '公之于众'
        };
        const actionDescription = actionTextMap[action] || '处理';
 
-       const processAction = (userInput) => {
+       const processAction = (userInputForEvent) => {
            db.social.gossip.splice(gossipIndex, 1);
-           progressStory(userInput);
-           alert(`你选择了 [${actionDescription}]。剧情将因此发生变化...`);
+
+           const event = {
+               id: `evt_${Date.now()}`,
+               type: 'letterAction',
+               action: action,
+               letterTitle: gossipItem.title,
+               actionDescription: userInputForEvent
+           };
+           if (!db.pendingEvents) db.pendingEvents = [];
+           db.pendingEvents.push(event);
+
+           saveData();
+           renderGossip();
+           showToast(`你选择了 [${actionDescription}]。此事或许会在未来产生影响...`, 'success');
        };
 
        if (action === 'reply') {
            showCustomPrompt('冒名回复情书', (replyContent) => {
                if (replyContent !== null) {
-                   const userInput = `[关于“${gossipItem.title}”，你决定冒名回复，并写道：“${replyContent}”]`;
-                   processAction(userInput);
+                   const userInputForEvent = `[关于“${gossipItem.title}”，你决定冒名回复，并写道：“${replyContent}”]`;
+                   processAction(userInputForEvent);
                }
            });
        } else {
-           const userInput = `[关于“${gossipItem.title}”，你决定“${actionDescription}”这封信。]`;
-           processAction(userInput);
+           const userInputForEvent = `[关于“${gossipItem.title}”，你决定“${actionDescription}”这封信。]`;
+           processAction(userInputForEvent);
        }
      }
 
@@ -5604,12 +5733,17 @@ forbidden_topics:
                        for (let i = 0; i < messages.length; i++) {
                            const msgNode = messages[i];
                            const chatId = msgNode.getAttribute('chatId');
-                           const senderName = msgNode.getAttribute('sender');
                            const content = msgNode.textContent;
-                           
-                           const senderId = Object.keys(db.relations).find(id => db.relations[id].name === senderName);
+                           let senderId = msgNode.getAttribute('senderId');
  
-                           if (chatId && senderId && content) {
+                           if (!senderId) {
+                               const senderName = msgNode.getAttribute('sender');
+                               if (senderName) {
+                                   senderId = Object.keys(db.relations).find(id => db.relations[id].name === senderName);
+                               }
+                           }
+ 
+                           if (chatId && senderId) {
                                if (!db.messaging.chatHistory[chatId]) {
                                    db.messaging.chatHistory[chatId] = [];
                                }
@@ -5621,6 +5755,19 @@ forbidden_topics:
                                    unread: true,
                                    role: 'model'
                                };
+
+                               const type = msgNode.getAttribute('type');
+                               if (type === 'transfer' || type === 'gift') {
+                                   newMessage.type = type;
+                                   if (type === 'transfer') {
+                                       newMessage.amount = parseInt(msgNode.getAttribute('amount'), 10) || 0;
+                                       newMessage.currency = msgNode.getAttribute('currency');
+                                   } else { // gift
+                                       newMessage.itemName = msgNode.getAttribute('itemName');
+                                   }
+                                   newMessage.status = 'pending';
+                               }
+
                                db.messaging.chatHistory[chatId].push(newMessage);
                            }
                        }
@@ -5684,7 +5831,13 @@ forbidden_topics:
                     }
                 }
 
-               const snapshot = JSON.stringify(db);
+               const usedEventMatch = fullResponse.match(/<UsedEvent id="([^"]+)"\s*\/>/);
+               if (usedEventMatch && db.pendingEvents) {
+                   const usedEventId = usedEventMatch[1];
+                   db.pendingEvents = db.pendingEvents.filter(event => event.id !== usedEventId);
+               }
+
+              const snapshot = JSON.stringify(db);
  
                if (regenerateIndex !== -1 && currentStoryLog[regenerateIndex]) {
                    const logEntry = currentStoryLog[regenerateIndex];
@@ -5781,6 +5934,19 @@ forbidden_topics:
            const recentChats = (db.messaging.chatHistory && Object.values(db.messaging.chatHistory).flat().slice(-3)) || [];
            const chatContext = recentChats.map(c => `- (${c.发送方} to ${c.role === 'user' ? '我' : c.发送方}): ${c.内容}`).join('\n');
            
+           let pendingEventContext = '';
+           const pendingEvents = db.pendingEvents || [];
+           // 33% chance to process a pending event
+           if (pendingEvents.length > 0 && Math.random() < 0.33) {
+               const eventToProcess = pendingEvents[0]; // Process one at a time
+               pendingEventContext = `
+  # 7. 待处理事件 (Pending Events)
+  **指示**: 你必须处理以下事件。在生成的剧情中，以一种自然、间接的方式，体现出这个事件所带来的后续影响。例如，某个角色可能会在对话中无意提及此事，或者某个八卦的出现与此相关。不要直接说“因为你评论了动态，所以...”。
+  -   **事件详情**: ${eventToProcess.actionDescription}
+  -   **输出要求**: 处理完后，你必须在最终输出中包含一个标签 <UsedEvent id="${eventToProcess.id}"/> 来标记此事件已被处理。
+  `;
+           }
+
            const recentPosts = db.social.posts.slice(-2);
            const postContext = recentPosts.map(post => {
                const recentComments = (post.comments || []).slice(-3).map(c => `  - ${c.user}: ${c.text}`).join('\n');
@@ -5845,8 +6011,10 @@ forbidden_topics:
      - **个人简介**: ${p.description}
   - **好感度**:
      ${Object.keys(db.relations).map(id => `- ${db.relations[id].name}: ${db.relations[id].affinity}`).join('\n    ')}
- 
-  # 6. 社交信息 (必须参考)
+
+  ${pendingEventContext}
+
+  # 8. 社交信息 (必须参考)
   - **最近的私人传音**:
   ${chatContext || "    - 无"}
   - **最近的瑶光镜动态与评论**:
@@ -5856,18 +6024,18 @@ forbidden_topics:
   - **现存群聊**:
   ${groupContext || "    - 无"}
 
-  # 7. 关键剧情记忆 (必须参考)
+  # 9. 关键剧情记忆 (必须参考)
   ${memoryContext || "    - 无"}
 
-  # 8. 最近的剧情历史 (必须严格参考)
+  # 10. 最近的剧情历史 (必须严格参考)
   ${recentStoryHistory}
- 
-  # 9. 用户的最新行动
+
+  # 11. 用户的最新行动
   <user_action>
   ${userInput}
   </user_action>
- 
-  # 10. 你的任务
+
+  # 12. 你的任务
   1.  **生成剧情**: 根据上述所有信息，特别是用户的行动、社交动态和最近的剧情历史，严格按照核心指令和所有设定，写一段承上启下的剧情。剧情必须以 **<story>** 标签包裹。
   2.  **提炼记忆 (必须)**: 根据你生成的剧情，提炼出关键信息，生成一个 **<memory>** 代码块，其中包含一个JSON对象。**这非常重要，用于自动记录游戏进程。**
        -   'time': 剧情发生的时间，格式为“XX年X月X日 X时”。
@@ -5879,18 +6047,24 @@ forbidden_topics:
        -   只有确实发生变化的变量才需要更新。
        -   好感度的变化必须合情合理，并给出简短注释。
   4.  **触发传音 (可选)**: 如果剧情事件会自然地引发某个角色发来“传音玉简”（即时消息），则生成一个 **<ChatUpdate>** 代码块。
-       -   这对于在主线剧情后，补充角色的私下反应或后续行动非常重要。
-  5.  **触发命令 (可选)**: 如果剧情需要执行一个特定的游戏动作，比如创建一个群聊，则生成一个 **<Command>** 代码块。
+       /*
+       -   **发送普通消息**: <message chatId="目标ID" sender="发送者角色名" senderId="角色ID">消息内容</message>
+       -   **发送红包**: <message chatId="目标ID" sender="发送者角色名" senderId="角色ID" type="transfer" amount="金额" currency="货币类型">祝福语</message> (货币类型: 上品, 下品)
+       -   **赠送礼物**: <message chatId="目标ID" sender="发送者角色名" senderId="角色ID" type="gift" itemName="物品名">赠言</message>
+       */
+   5.  **触发命令 (可选)**: 如果剧情需要执行一个特定的游戏动作，比如创建一个群聊，则生成一个 **<Command>** 代码块。
        -   <CreateGroup groupName="群聊名称" initiator="发起人角色名" members="<user>,角色A,角色B" />
   6.  **创造新物品 (可选)**: 当剧情需要（如任务奖励、商店刷新、角色赠予、奇遇发现）时，你可以创造一个全新的、世界上从未出现过的物品。
       -   **格式**: 必须使用 \`<NewItem>\` 标签，并包含 \`name\`, \`category\`, \`description\`, 和 \`icon\` 属性。
       -   **示例**: \`<NewItem name="流云仙酿" category="丹药" description="饮用后可暂时提升修为，但有醉倒的风险。" icon="🍶" />\`
       -   **类别**: 物品的 \`category\` 必须是 '丹药', '法器', '礼品', '特殊' 中的一个。
 
-  # 11. 输出格式（必须严格遵守）
+  # 13. 输出格式（必须严格遵守）
   <story>
   在这里写入生成的剧情...
   </story>
+
+  <UsedEvent id="evt_xxxxxxxx" />
 
   <memory>
   {
@@ -5911,8 +6085,8 @@ forbidden_topics:
    </UpdateVariable>
 
   <ChatUpdate>
-     <message chatId="qingjue" senderId="qingjue">你刚才在做什么？</message>
-     <message chatId="group_12345" senderId="fusang">此地灵气有异动。</message>
+     <message chatId="qingjue" sender="青珏" senderId="qingjue">你刚才在做什么？</message>
+     <message chatId="group_12345" sender="扶桑" senderId="fusang">此地灵气有异动。</message>
   </ChatUpdate>
   
   <Command>
@@ -6220,6 +6394,57 @@ forbidden_topics:
             renderPrivateMessageList();
         });
       }
+     function openForwardModalForSingleMessage(message, onConfirm) {
+         const modal = document.getElementById('forward-message-modal');
+         const targetList = document.getElementById('forward-target-list');
+         const confirmBtn = document.getElementById('confirm-forward-btn');
+         const cancelBtn = modal.querySelector('[data-close-button]');
+         targetList.innerHTML = '';
+         
+         const allTargets = [...(db.messaging.unlockedContacts || []), ...Object.keys(db.messaging.groups || [])];
+         
+         allTargets.forEach(id => {
+             let name, avatar;
+             if(db.relations[id]) { // It's a user
+                 name = db.relations[id].name;
+                 avatar = db.relations[id].avatar || generateDefaultAvatar(name);
+             } else { // It's a group
+                 name = db.messaging.groups[id].name;
+                 avatar = db.messaging.groups[id].avatar || generateDefaultAvatar('群');
+             }
+             
+             targetList.innerHTML += `
+                 <label class="flex items-center p-2 hover:bg-gray-50 rounded-md cursor-pointer">
+                     <input type="checkbox" value="${id}" class="mr-3 form-checkbox h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                     <img src="${avatar}" class="w-8 h-8 rounded-full mr-2">
+                     <span>${name}</span>
+                 </label>
+             `;
+         });
+
+         const close = () => {
+             modal.classList.add('hidden');
+             confirmBtn.removeEventListener('click', confirmHandler);
+             cancelBtn.removeEventListener('click', close);
+         };
+
+         const confirmHandler = () => {
+             const selectedTargets = Array.from(targetList.querySelectorAll('input:checked')).map(el => el.value);
+             if (selectedTargets.length === 0) {
+                 alert('请至少选择一个转发目标。');
+                 return;
+             }
+             onConfirm(selectedTargets);
+             close();
+         };
+         
+         confirmBtn.addEventListener('click', confirmHandler);
+         cancelBtn.addEventListener('click', close, { once: true });
+         
+         modal.classList.remove('hidden');
+         modal.classList.add('flex');
+     }
+
      function showToast(message, type = 'success') {
          const toast = document.createElement('div');
          toast.className = `toast-notification toast-${type}`;
@@ -6343,6 +6568,17 @@ forbidden_topics:
            db.social.posts = [];
        }
        db.social.posts.unshift(newPost);
+
+       const event = {
+           id: `evt_${Date.now()}`,
+           type: 'socialPost',
+           postId: newPost.id,
+           content: newPost.content,
+           actionDescription: `你在瑶光镜发布了一条新动态：“${newPost.content}”`
+       };
+       if (!db.pendingEvents) db.pendingEvents = [];
+       db.pendingEvents.push(event);
+
        saveData();
        renderSocialFeed();
 
