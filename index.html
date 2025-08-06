@@ -780,8 +780,24 @@
         line-height: 1.3;
       }
       .memory-table-scroll {
-        overflow-x: auto;
+        overflow-x: scroll;
         width: 100%;
+        scrollbar-width: auto; /* Firefox */
+        -webkit-overflow-scrolling: touch; /* iOS/Android */
+        background: #f8fafc;
+        padding-bottom: 8px;
+      }
+      .memory-table-scroll::-webkit-scrollbar {
+        height: 10px;
+        background: #f1f5f9;
+      }
+      .memory-table-scroll::-webkit-scrollbar-thumb {
+        background: linear-gradient(to right, var(--accent-color-blue), var(--accent-color-pink));
+        border-radius: 6px;
+      }
+      .memory-table-scroll::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 6px;
       }
       #memory-table-body td {
         max-width: 120px;
@@ -6340,17 +6356,58 @@ forbidden_topics:
             return;
         }
 
-        memories.forEach(mem => {
-            const row = `
-                <tr>
-                    <td>${mem.time || ''}</td>
-                    <td>${mem.characters || ''}</td>
-                    <td>${mem.summary || ''}</td>
-                    <td>${mem.items || ''}</td>
-                </tr>
-            `;
-            tableBody.innerHTML += row;
+        memories.forEach((mem, idx) => {
+            // 兼容：优先用 memory 里的 location 字段，否则用 world 里的当前地点
+            const location = mem.location || mem.地点 || (db && db.world && db.world.locationName) || '未知';
+            const row = document.createElement('tr');
+            row.setAttribute('data-row', idx);
+
+            // 展开按钮
+            const expandTd = document.createElement('td');
+            expandTd.className = 'memory-expand-btn';
+            expandTd.title = '展开/收起';
+            expandTd.textContent = '▶';
+            row.appendChild(expandTd);
+
+            // 时间
+            const timeTd = document.createElement('td');
+            timeTd.textContent = mem.time || '';
+            row.appendChild(timeTd);
+
+            // 登场人物
+            const charsTd = document.createElement('td');
+            charsTd.textContent = mem.characters || '';
+            row.appendChild(charsTd);
+
+            // 地点
+            const locTd = document.createElement('td');
+            locTd.textContent = location;
+            row.appendChild(locTd);
+
+            // 剧情简介
+            const summaryTd = document.createElement('td');
+            summaryTd.textContent = mem.summary || '';
+            row.appendChild(summaryTd);
+
+            // 道具/货币变化
+            const itemsTd = document.createElement('td');
+            itemsTd.textContent = mem.items || '';
+            row.appendChild(itemsTd);
+
+            tableBody.appendChild(row);
         });
+
+        // 事件绑定：点击展开/收起整行
+        setTimeout(() => {
+          document.querySelectorAll('#memory-table-body td.memory-expand-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+              const tr = this.parentElement;
+              const expanded = tr.classList.toggle('expanded');
+              // 切换图标
+              this.textContent = expanded ? '▼' : '▶';
+            });
+          });
+        }, 0);
       }
 
        function showCustomPrompt(title, callback) {
