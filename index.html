@@ -1001,6 +1001,24 @@
                     <label for="user-desc-input" class="block text-sm font-medium text-gray-700">详细介绍</label>
                     <textarea id="user-desc-input" rows="6" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></textarea>
                 </div>
+                <!-- 属性设定分区 -->
+                <div class="mb-4 border-t pt-4">
+                    <label class="block text-base font-bold text-gray-700 mb-2">属性设定</label>
+                    <div class="grid grid-cols-1 gap-2">
+                        <div>
+                            <label for="user-identity-input" class="block text-sm font-medium text-gray-700">身份（每行一个）</label>
+                            <textarea id="user-identity-input" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="如：天澜国公主&#10;灵素阁幕后老板"></textarea>
+                        </div>
+                        <div>
+                            <label for="user-spiritroot-input" class="block text-sm font-medium text-gray-700">灵根（每行一个）</label>
+                            <textarea id="user-spiritroot-input" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="如：水木火三灵根&#10;天级"></textarea>
+                        </div>
+                        <div>
+                            <label for="user-cultivation-input" class="block text-sm font-medium text-gray-700">修为（每行一个）</label>
+                            <textarea id="user-cultivation-input" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="如：化神期&#10;无修为/炼气期"></textarea>
+                        </div>
+                    </div>
+                </div>
                 <div class="flex justify-end">
                     <button id="save-user-settings-btn" class="btn-primary">保存</button>
                 </div>
