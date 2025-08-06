@@ -1007,7 +1007,7 @@
                     <div class="grid grid-cols-1 gap-2">
                         <div>
                             <label for="user-identity-input" class="block text-sm font-medium text-gray-700">身份（每行一个）</label>
-                            <textarea id="user-identity-input" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="如：天澜国公主&#10;灵素阁幕后老板"></textarea>
+                            <textarea id="user-identity-input" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="如：天澜国公主&#10;离火丹宫亲传弟子"></textarea>
                         </div>
                         <div>
                             <label for="user-spiritroot-input" class="block text-sm font-medium text-gray-700">灵根（每行一个）</label>
@@ -2778,7 +2778,7 @@ details:
             spiritRootEl.textContent = sr;
           } else if (protagonist.description) {
             // 自动从设定文本中提取灵根
-            // 例：“水木火三灵根”、“三灵根”、“水灵根”、“天级”
+            // 例：“水木双灵根”、“三灵根”、“水灵根”、“天级”
             const match = protagonist.description.match(/([金木水火土冰雷风毒幻]+)(三|四|五)?灵根/);
             const grade = protagonist.description.match(/(天|地|玄|黄|白)级/);
             if (match) {
@@ -2809,7 +2809,7 @@ details:
           } else if (typeof cv === 'string') {
             cultivationRealmEl.textContent = cv;
           } else if (protagonist.description) {
-            // 自动从设定文本中提取修为（如“化神级”、“无修为/炼气期”）
+            // 自动从设定文本中提取修为（如“化神级”、“炼气期”）
             const match = protagonist.description.match(/(无修为|炼气期|筑基期|金丹期|元婴期|化神级?|合道期|大乘期|渡劫期|圣人|天尊|长老|皇|主|宗主|期|级)/g);
             if (match) {
               cultivationRealmEl.innerHTML = match.join('<br>');
