@@ -2747,14 +2747,15 @@ details:
         container.innerHTML = '';
         const majorNpcNames = ['青珏', '扶桑', '纳兰奚照'];
 
-        const presentNPCs = db.world.presentNPCs || [];
-        if (presentNPCs.length === 0) {
+        // 显示所有NPC
+        const allNpcIds = Object.keys(db.relations || {});
+        if (allNpcIds.length === 0) {
           container.innerHTML =
-            '<p class="text-sm text-gray-500 text-center col-span-full py-8">当前场景暂无其他人物。</p>';
+            '<p class="text-sm text-gray-500 text-center col-span-full py-8">暂无任何NPC。</p>';
           return;
         }
 
-        presentNPCs.forEach(id => {
+        allNpcIds.forEach(id => {
           const rel = db.relations[id];
           if (!rel) return; // 如果关系数据不存在，则跳过
 
@@ -3709,15 +3710,16 @@ details:
         const locationDisplay = document.getElementById('location-display');
         const locationIconDisplay = document.getElementById('location-icon-display');
 
-        if (timeDisplay) timeDisplay.textContent = db.world.timeOfDay;
-        if (eraDisplay) eraDisplay.textContent = db.world.eraName;
+        // 强制刷新所有字段
+        if (timeDisplay) timeDisplay.textContent = db.world.timeOfDay || '';
+        if (eraDisplay) eraDisplay.textContent = db.world.eraName || '';
         if (yearDisplay) yearDisplay.textContent = db.world.year ? `${db.world.year}年` : '';
         if (dateDisplay) dateDisplay.textContent = (db.world.month && db.world.day) ? `${db.world.month}月${db.world.day}日` : '';
-        if (seasonDisplay) seasonDisplay.textContent = db.world.season;
-        if (timeIconDisplay) timeIconDisplay.textContent = db.world.timeIcon;
-        if (seasonIconDisplay) seasonIconDisplay.textContent = db.world.seasonIcon;
-        if (locationDisplay) locationDisplay.textContent = db.world.locationName;
-        if (locationIconDisplay) locationIconDisplay.textContent = db.world.locationIcon;
+        if (seasonDisplay) seasonDisplay.textContent = db.world.season || '';
+        if (timeIconDisplay) timeIconDisplay.textContent = db.world.timeIcon || '';
+        if (seasonIconDisplay) seasonIconDisplay.textContent = db.world.seasonIcon || '';
+        if (locationDisplay) locationDisplay.textContent = db.world.locationName || '';
+        if (locationIconDisplay) locationIconDisplay.textContent = db.world.locationIcon || '';
       }
 
       function renderShop() {
@@ -4052,6 +4054,8 @@ forbidden_topics:
         renderShop();
         renderSocialFeed();
         renderGossip();
+        // 保证属性面板内容始终刷新
+        renderPlayerAttributes();
       }
 
       // World Info Modal Logic
@@ -4199,8 +4203,11 @@ forbidden_topics:
                   alert('用户设定已保存！');
                   modal.classList.add('hidden');
                   modal.classList.remove('flex');
+                  // 强制刷新属性面板和头部信息
+                  renderPlayerAttributes();
+                  renderHeader();
                   renderApp();
-
+                  
                   // Refresh chat view if it's open to show new avatar
                   const chatView = document.getElementById('chat-view');
                   if (chatView && !chatView.classList.contains('hidden')) {
