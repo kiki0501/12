@@ -1429,7 +1429,8 @@
                         <button data-story-action="memory" class="text-left px-4 py-2 rounded-md hover:bg-gray-200 text-sm">记忆表格</button>
                     </div>
                 </div>
-                <input type="text" id="story-message-input" placeholder="在此回应剧情..." class="chat-input" />
+                <textarea id="story-message-input" placeholder="在此回应剧情..." class="chat-input" rows="1" style="resize:none;"></textarea>
+                <button id="system-insert-btn" title="快速插入系统指令" style="margin-left:4px;font-size:1.2em;line-height:1;cursor:pointer;background:transparent;border:none;" tabindex="-1">🤖</button>
                 <button id="story-send-btn" class="chat-send-btn">发送</button>
             </div>
           </div>
@@ -1499,7 +1500,7 @@
                    </div>
                   <div class="chat-input-area flex-shrink-0 items-center">
                    <button id="chat-actions-btn" class="p-2 text-2xl text-gray-500 hover:text-gray-800">+</button>
-                    <input type="text" id="chat-message-input" placeholder="输入消息..." class="chat-input" />
+                    <textarea id="chat-message-input" placeholder="输入消息..." class="chat-input" rows="2" style="resize:none;min-height:40px;"></textarea>
                     <button id="chat-send-btn" class="chat-send-btn">发送</button>
                     <button id="get-reply-btn" class="chat-send-btn" style="background-color: var(--accent-color-pink); margin-left: 8px;">回应</button>
                   </div>
@@ -1891,15 +1892,15 @@
            },
            protagonist: protagonist,
            world: {
-               eraName: '未知',
-               year: '',
-               month: '',
-               day: '',
-               timeOfDay: '未知',
+               eraName: '云巅',
+               year: '3065',
+               month: '8',
+               day: '9',
+               timeOfDay: '夜晚',
                timeIcon: '❔',
-               season: '未知',
+               season: '夏',
                seasonIcon: '❔',
-               locationName: '未知',
+               locationName: '混沌空间',
                locationIcon: '📍',
                presentNPCs: [],
            },
@@ -2263,6 +2264,20 @@ additional_notes:
   - 他最大的乐趣就是看着别人以为占了便宜，实际上都在他的掌控之中
   - 水木双灵根让他既有水的柔韧，也有木的坚韧，性格中温和与坚持并存
   - 在宫中有"温润如玉的陛下"之称，但老臣们都知道这块"玉"可不好糊弄
+</CharacterCard>`
+              ,
+              'system': `<CharacterCard>
+系统设定：云巅系统
+**核心定位**: 专为穿越者<user>提供的辅助工具，无独立意识，不可攻略，是<user>最忠诚的伙伴。与你的对话不会被其他{char}察觉。
+**形态与性格**:
+- **初始状态**: 系统在初次激活时，会随机生成一种初始形态（如：光球、灵宠卷等）和一种交互性格（如：高冷、温柔、毒舌等）。
+- **自定义**: <user>可以随时根据自己的喜好自由更改系统的外在形态与交流性格。
+**当<user>输入“▷系统：xxx”时，你必须出现并参与进正文里，同时以上帝视角继续剧情。
+example:
+<user>：▷系统：你有什么好主意吗？
+这不公平！
+系统：我认为……
+{{旁白/其他npc}}：xxxxx
 </CharacterCard>`
               }, // closes characterCards
               nsfwProfile: `<character_intimate_profile character="青珏, 扶桑, 纳兰奚照, 商臻">
@@ -3376,11 +3391,11 @@ details:
                    return `${l.type === 'user' ? p.name : '剧情'}: ${content}`;
                }).join('\n')
                : '无';
-
+ 
            const worldInfoForPrompt = Object.entries(staticData.worldInfo || {})
                 .map(([key, value]) => `## ${key}\n${value}`)
                 .join('\n\n');
-
+ 
            let characterProfiles = '';
            let affinityLogicForPrompt = '';
            
@@ -3402,7 +3417,14 @@ details:
  
            affinityLogicForPrompt = memberIds.map(id => staticData.affinityLogic[id] || '').filter(Boolean).join('\n\n');
  
-           return `你正在一个名为“云巅”的修真世界中，通过一个名为“传音玉简”的法器与我交流。请严格遵守以下规则：
+           // 注入“私人传音禁止线下动作”规则
+           let privateRule = '';
+           if (chatType === 'private') {
+             privateRule = `【重要规则】你正在使用“传音玉简”进行远程通讯（类似手机/微信），禁止生成任何线下见面或肢体动作（如“坐过来”“让我看看你”“递给你”“帮我接住那个球”等），只能进行远程对话、表情、语音、图片、红包等互动。`;
+           }
+ 
+           return `${privateRule}
+ 你正在一个名为“云巅”的修真世界中，通过一个名为“传音玉简”的法器与我交流。请严格遵守以下规则：
  
  # 核心规则
  1.  **聊天式互动**: 你的行为模式是一个聊天机器人。请完全代入你被指定的角色进行对话，模拟真人的聊天习惯。
@@ -3669,11 +3691,19 @@ details:
 
       chatSendButton.addEventListener('click', sendMessage);
       document.getElementById('get-reply-btn').addEventListener('click', () => getAiReply());
-      chatMessageInput.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
+      chatMessageInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
           sendMessage();
         }
       });
+      // 自动高度
+      chatMessageInput.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+      });
+      // 初始高度
+      chatMessageInput.style.height = chatMessageInput.scrollHeight + 'px';
 
       const avatarUploadInput = document.getElementById('avatar-upload-input');
       
@@ -3742,14 +3772,43 @@ details:
 
       const storySendButton = document.getElementById('story-send-btn');
       const storyMessageInput = document.getElementById('story-message-input');
+      // 系统指令按钮事件
+      const systemInsertBtn = document.getElementById('system-insert-btn');
+      if (systemInsertBtn && storyMessageInput) {
+        systemInsertBtn.addEventListener('click', function () {
+          const insertText = '▷系统：';
+          const input = storyMessageInput;
+          const start = input.selectionStart;
+          const end = input.selectionEnd;
+          const value = input.value;
+          input.value = value.slice(0, start) + insertText + value.slice(end);
+          input.selectionStart = input.selectionEnd = start + insertText.length;
+          input.focus();
+        });
+      }
 
       storySendButton.addEventListener('click', () => {
           const text = storyMessageInput.value.trim();
           if(text) {
               progressStory(text);
               storyMessageInput.value = '';
+              storyMessageInput.style.height = 'auto';
           }
       });
+      // 支持 Shift+Enter 换行，Enter 发送
+      storyMessageInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          storySendButton.click();
+        }
+      });
+      // 自动高度
+      storyMessageInput.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+      });
+      // 初始高度
+      storyMessageInput.style.height = storyMessageInput.scrollHeight + 'px';
 
       const difficultyMap = {
         simple: 'tag-difficulty-simple',
@@ -3836,8 +3895,25 @@ details:
             // 增加卡片宽度
             card.style.maxWidth = '98%';
 
-            const currentResponse = logEntry.responses[logEntry.currentIndex];
-            let content = currentResponse || '';
+            // 容错：responses 结构异常时显示提示
+            let content = '';
+            try {
+                if (
+                  !logEntry.responses ||
+                  !Array.isArray(logEntry.responses) ||
+                  typeof logEntry.currentIndex !== 'number' ||
+                  !logEntry.responses[logEntry.currentIndex]
+                ) {
+                  content = '<span style="color:#f43f5e">[⚠️ 无法获取剧情内容]</span>';
+                } else {
+                  content = logEntry.responses[logEntry.currentIndex];
+                  if (typeof content !== 'string') content = JSON.stringify(content);
+                  if (!content.trim()) content = '<span style="color:#f43f5e">[⚠️ 剧情内容为空]</span>';
+                }
+            } catch (e) {
+                content = `<span style="color:#f43f5e">[剧情内容解析异常: ${e.message}]</span>`;
+                console.error('剧情渲染异常', e, logEntry);
+            }
 
             const controls = document.createElement('div');
             controls.className = 'story-card-controls flex justify-end items-center gap-2 mt-2 opacity-80';
@@ -3862,7 +3938,12 @@ details:
                 cardWrapper.innerHTML = checkboxHTML;
             }
             // Allow both HTML and Markdown
-            card.innerHTML = marked.parse(content, { gfm: true, breaks: true });
+            try {
+                card.innerHTML = marked.parse(content, { gfm: true, breaks: true });
+            } catch (err) {
+                card.innerHTML = `<div style="color:#f43f5e">[Markdown解析失败] ${err.message}</div><pre style="white-space:pre-wrap">${content}</pre>`;
+                console.error('marked.parse 失败', err, content);
+            }
             cardWrapper.appendChild(card);
             // controls 移到卡片下方
             card.appendChild(controls);
@@ -4391,6 +4472,22 @@ forbidden_topics:
               saveBtn.addEventListener('click', () => {
                   db.protagonist.name = nameInput.value;
                   db.protagonist.description = descInput.value;
+                  // 属性设定注入结构化字段
+                  const identityInput = document.getElementById('user-identity-input');
+                  const spiritRootInput = document.getElementById('user-spiritroot-input');
+                  const cultivationInput = document.getElementById('user-cultivation-input');
+                  if (identityInput) {
+                    const lines = identityInput.value.split('\n').map(l => l.trim()).filter(Boolean);
+                    db.protagonist.identity = lines.length > 1 ? lines : (lines[0] || '');
+                  }
+                  if (spiritRootInput) {
+                    const lines = spiritRootInput.value.split('\n').map(l => l.trim()).filter(Boolean);
+                    db.protagonist.spiritRoot = lines.length > 1 ? lines : (lines[0] || '');
+                  }
+                  if (cultivationInput) {
+                    const lines = cultivationInput.value.split('\n').map(l => l.trim()).filter(Boolean);
+                    db.protagonist.cultivation = lines.length > 1 ? lines : (lines[0] || '');
+                  }
                   saveData();
                   alert('用户设定已保存！');
                   modal.classList.add('hidden');
@@ -4398,6 +4495,17 @@ forbidden_topics:
                   // 强制刷新属性面板和头部信息
                   renderPlayerAttributes();
                   renderHeader();
+                  // 自动切换到“我的属性”子tab并刷新
+                  const attrTabBtn = document.querySelector('button[data-subtab="profile-attributes"]');
+                  const attrTab = document.getElementById('profile-attributes');
+                  if (attrTabBtn && attrTab) {
+                    // 切换tab按钮激活
+                    document.querySelectorAll('.sub-tab-button').forEach(btn => btn.classList.remove('active'));
+                    attrTabBtn.classList.add('active');
+                    // 显示属性内容，隐藏其他内容
+                    document.querySelectorAll('.sub-tab-content').forEach(tab => tab.classList.add('hidden'));
+                    attrTab.classList.remove('hidden');
+                  }
                   renderApp();
                   
                   // Refresh chat view if it's open to show new avatar
@@ -4616,21 +4724,90 @@ forbidden_topics:
                     if(currentLog) {
                       currentLog.snapshot = JSON.stringify(db);
                     }
-                    
-                    // 2. Create a new story log
+
+                    // 2. 保留用户自定义头像/昵称，角色头像和自定义数据
+                    const keepProtagonist = { ...db.protagonist };
+                    const keepAvatars = {};
+                    Object.keys(db.relations || {}).forEach(id => {
+                      if (db.relations[id] && db.relations[id].avatar) {
+                        keepAvatars[id] = db.relations[id].avatar;
+                      }
+                    });
+                    // 角色自定义数据（如自定义名/描述）也保留
+                    const keepCustom = {};
+                    Object.keys(db.relations || {}).forEach(id => {
+                      if (db.relations[id] && db.relations[id].custom) {
+                        keepCustom[id] = db.relations[id].custom;
+                      }
+                    });
+
+                    // 3. 历史剧情保留
+                    const oldLogs = { ...db.story.logs };
+
+                    // 4. 重置所有数据为初始状态
+                    const defaultDb = getInitialDb();
+                    // 恢复用户自定义头像/昵称
+                    defaultDb.protagonist.avatar = keepProtagonist.avatar;
+                    defaultDb.protagonist.name = keepProtagonist.name;
+                    defaultDb.protagonist.description = keepProtagonist.description;
+                    // 恢复角色头像和自定义数据
+                    Object.keys(keepAvatars).forEach(id => {
+                      if (defaultDb.relations[id]) defaultDb.relations[id].avatar = keepAvatars[id];
+                    });
+                    Object.keys(keepCustom).forEach(id => {
+                      if (defaultDb.relations[id]) defaultDb.relations[id].custom = keepCustom[id];
+                    });
+                    // 保留用户设定
+                    defaultDb.userSettings = { ...db.userSettings };
+
+                    // 5. 新剧情log
                     const newLogId = `log_${Date.now()}`;
-                    db.story.logs[newLogId] = {
+                    // 合并历史剧情
+                    defaultDb.story.logs = { ...oldLogs };
+                    defaultDb.story.logs[newLogId] = {
                         id: newLogId,
                         name: newName,
                         createdAt: Date.now(),
-                        log: [{ type: 'GM', responses: [`## ${newName}\n\n新的故事开始了...`], currentIndex: 0 }],
+                        log: [
+                          // 固定的初始剧情消息（与最初一致）
+                          { type: 'GM', responses: [
+`【叮——】
+
+# ♢天道客服520为您服务♢
+≮检测到异界电波波动≯
+≮正在载入《白泽图》v18.2.4版兼容补丁≯
+≮滋滋…检测到宿主携带二十一世纪996福报记忆，自动激活代码修仙模块≯
+
+✦•〘系统广播〙•✦
+亲爱的主人~欢迎来到大型沉浸式修仙MMORPG《云巅灵契录》！
+本系统已破解天道防火墙，VIP通道直达轮回司后台
+您将享受以下特权：
+☯ 随时查阅NPC裤腰带以下的秘密档案
+☯ 对高岭之花剑尊/病娇妖王进行【不可描述】模组加载
+☯ 在作死边缘反复横跳时获得专属存档点
+
+当前世界线加载完毕——
+⚠警告：合欢楼老板青珏的尾巴毛薅起来手感最佳
+⚠警告：皇帝寝宫龙榻下藏着初代天澜帝与白泽的婚书
+
+「别盯着汴京红灯区的合欢楼流口水了，快动动手指——」
+「输入【抽取身份】解锁您的专属·社畜修仙·逆袭剧本吧！」
+
+（暗戳戳搓爪）今天能抽到被妖王强取豪夺的小可怜，还是把十方殿长老当韭菜割的黑心资本家呢~
+（小声）建议避开云谏长老，她第九个头正在更年期...`
+                          ], currentIndex: 0 },
+                          // 新剧情标题
+                          { type: 'GM', responses: [`## ${newName}\n\n新的故事开始了...`], currentIndex: 0 }
+                        ],
                         snapshot: null // New stories don't have a prior snapshot
                     };
+                    defaultDb.story.currentLogId = newLogId;
 
-                    // 3. Set the new story as current
-                    db.story.currentLogId = newLogId;
+                    // 6. 用新状态覆盖db
+                    Object.keys(db).forEach(k => delete db[k]);
+                    Object.assign(db, defaultDb);
 
-                    // 4. Save and re-render everything
+                    // 7. Save and re-render everything
                     saveData();
                     renderApp();
                     alert(`已开启新剧情: ${newName}`);
@@ -5933,6 +6110,8 @@ forbidden_topics:
        
        function applyStateUpdates(updateBlock) {
             try {
+                let inventoryChanged = false;
+                let worldChanged = false;
                 const commands = updateBlock.split('_.set(').slice(1);
                 commands.forEach(cmd => {
                     const parts = cmd.split(',');
@@ -5957,7 +6136,32 @@ forbidden_topics:
                     }
                     
                     setNestedValue(db, path, newValue);
+                    // 检查是否涉及 inventory
+                    if (path.startsWith('inventory')) {
+                      inventoryChanged = true;
+                      if (typeof console !== 'undefined') {
+                        console.log('[剧情物品变更]', path, newValue, JSON.parse(JSON.stringify(db.inventory)));
+                      }
+                    }
+                    // 检查是否涉及 world
+                    if (path.startsWith('world')) {
+                      worldChanged = true;
+                      if (typeof console !== 'undefined') {
+                        console.log('[剧情世界变量变更]', path, newValue, JSON.parse(JSON.stringify(db.world)));
+                      }
+                    }
                 });
+                // 如果涉及行囊，强制刷新
+                if (inventoryChanged && typeof renderInventory === 'function') {
+                  renderInventory();
+                }
+                // 如果涉及 world，强制刷新顶栏
+                if (worldChanged && typeof updateWorldDate === 'function') {
+                  updateWorldDate();
+                }
+                if (worldChanged && typeof renderHeader === 'function') {
+                  renderHeader();
+                }
             } catch (error) {
                 console.error("Error applying state updates:", error, "\nUpdate block:", updateBlock);
                 alert(`更新游戏状态时出错: ${error.message}。请检查AI返回的格式。`);
@@ -6132,17 +6336,77 @@ forbidden_topics:
               const snapshot = JSON.stringify(db);
  
                if (regenerateIndex !== -1 && currentStoryLog[regenerateIndex]) {
+                   // regenerate 时只追加到当前 GM
                    const logEntry = currentStoryLog[regenerateIndex];
                    logEntry.responses.push(storyText);
                    logEntry.currentIndex = logEntry.responses.length - 1;
                    logEntry.memory = memoryData;
                } else {
+                   // 每次剧情推进都新建一条 GM logEntry，绝不覆盖或合并
                    currentStoryLog.push({ type: 'GM', responses: [storyText], currentIndex: 0, snapshot, memory: memoryData });
                }
  
                renderApp();
                checkCompletedTasks(db);
                saveData();
+               // 剧情奖励自动写入行囊（兜底机制）
+               if (memoryData && memoryData.items && typeof memoryData.items === 'string') {
+                 // 支持多条奖励
+                 const rewards = memoryData.items.split(/[,，；;]/);
+                 rewards.forEach(reward => {
+                   // 匹配“获得: 名称x数量”或“获得：名称x数量”
+                   const m = reward.match(/获得[:：]?\s*([^\sx]+)\s*x\s*(\d+)/);
+                   if (m) {
+                     const itemName = m[1].trim();
+                     const itemCount = parseInt(m[2], 10) || 1;
+                     // 智能分类
+                     let category = '特殊';
+                     if (itemName.includes('灵石')) category = '特殊';
+                     else if (itemName.includes('丹')) category = '丹药';
+                     else if (itemName.includes('法器') || itemName.includes('剑') || itemName.includes('炉')) category = '法器';
+                     else if (itemName.includes('礼')) category = '礼品';
+                     if (!db.inventory[category]) db.inventory[category] = {};
+                     db.inventory[category][itemName] = (db.inventory[category][itemName] || 0) + itemCount;
+                     if (typeof renderInventory === 'function') renderInventory();
+                     if (typeof showToast === 'function') showToast(`获得 ${itemName} x${itemCount}`, 'success');
+                   }
+                 });
+               }
+               // 自动猜测剧情时间、地点并写入 world
+               if (memoryData) {
+                 // 1. time 字段
+                 if (memoryData.time && typeof memoryData.time === 'string') {
+                   // 例：云巅 3065年8月9日 夜晚
+                   const t = memoryData.time.match(/(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日/);
+                   if (t) {
+                     db.world.year = t[1];
+                     db.world.month = t[2];
+                     db.world.day = t[3];
+                   }
+                   // 时间段
+                   const tod = memoryData.time.match(/(清晨|早晨|上午|中午|下午|傍晚|黄昏|夜晚|深夜|凌晨)/);
+                   if (tod) db.world.timeOfDay = tod[1];
+                 }
+                 // 2. location 字段
+                 if (memoryData.location && typeof memoryData.location === 'string') {
+                   db.world.locationName = memoryData.location;
+                 }
+                 // 3. summary/characters 里推断地点（兜底）
+                 if (!db.world.locationName && memoryData.summary) {
+                   const loc = memoryData.summary.match(/(?:在|被送往|传送至|前往|抵达)([^\s，。、“”]+)(?:，|。|$)/);
+                   if (loc) db.world.locationName = loc[1];
+                 }
+               }
+               // 保证剧情推进后季节、行囊和顶栏刷新
+               if (typeof updateWorldDate === 'function') {
+                 updateWorldDate();
+               }
+               if (typeof renderInventory === 'function') {
+                 renderInventory();
+               }
+               if (typeof renderHeader === 'function') {
+                 renderHeader();
+               }
            }
        }
 
@@ -6495,7 +6759,7 @@ forbidden_topics:
         const memories = currentStoryLog.map(entry => entry.memory).filter(Boolean);
 
         if (memories.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="4" class="text-center text-gray-500 py-4">记忆是空白的。</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-gray-500 py-4">记忆是空白的。</td></tr>`;
             return;
         }
 
@@ -6514,27 +6778,27 @@ forbidden_topics:
 
             // 时间
             const timeTd = document.createElement('td');
-            timeTd.textContent = mem.time || '';
+            timeTd.innerHTML = `<span class="memory-cell-content">${mem.time || ''}</span>`;
             row.appendChild(timeTd);
 
             // 登场人物
             const charsTd = document.createElement('td');
-            charsTd.textContent = mem.characters || '';
+            charsTd.innerHTML = `<span class="memory-cell-content">${mem.characters || ''}</span>`;
             row.appendChild(charsTd);
 
             // 地点
             const locTd = document.createElement('td');
-            locTd.textContent = location;
+            locTd.innerHTML = `<span class="memory-cell-content">${location}</span>`;
             row.appendChild(locTd);
 
             // 剧情简介
             const summaryTd = document.createElement('td');
-            summaryTd.textContent = mem.summary || '';
+            summaryTd.innerHTML = `<span class="memory-cell-content">${(mem.summary || '').replace(/\n/g, '<br>')}</span>`;
             row.appendChild(summaryTd);
 
             // 道具/货币变化
             const itemsTd = document.createElement('td');
-            itemsTd.textContent = mem.items || '';
+            itemsTd.innerHTML = `<span class="memory-cell-content">${mem.items || ''}</span>`;
             row.appendChild(itemsTd);
 
             tableBody.appendChild(row);
@@ -6548,6 +6812,35 @@ forbidden_topics:
               const expanded = tr.classList.toggle('expanded');
               // 切换图标
               this.textContent = expanded ? '▼' : '▶';
+              // 强制展开/收起所有td内容
+              const tds = tr.querySelectorAll('td');
+              tds.forEach((td, idx) => {
+                if (idx === 0) return; // 跳过展开按钮
+                const span = td.querySelector('.memory-cell-content');
+                if (expanded) {
+                  td.style.whiteSpace = 'pre-line';
+                  td.style.overflow = 'visible';
+                  td.style.textOverflow = 'initial';
+                  td.style.maxWidth = 'none';
+                  if (span) {
+                    span.style.whiteSpace = 'pre-line';
+                    span.style.overflow = 'visible';
+                    span.style.textOverflow = 'initial';
+                    span.style.maxWidth = 'none';
+                  }
+                } else {
+                  td.style.whiteSpace = '';
+                  td.style.overflow = '';
+                  td.style.textOverflow = '';
+                  td.style.maxWidth = '';
+                  if (span) {
+                    span.style.whiteSpace = '';
+                    span.style.overflow = '';
+                    span.style.textOverflow = '';
+                    span.style.maxWidth = '';
+                  }
+                }
+              });
             });
           });
         }, 0);
