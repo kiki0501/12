@@ -1579,6 +1579,9 @@
             </div>
         </div>
     <script>
+      // 新增：每个聊天独立的“正在输入”状态
+      const typingStatus = {};
+
       const canvas = document.getElementById('bg-canvas');
       const ctx = canvas.getContext('2d');
       canvas.width = window.innerWidth;
@@ -3010,10 +3013,27 @@ details:
         chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
         
         isGenerating = false;
+        // 新增：恢复当前chatId的“正在输入”状态
         const typingIndicator = document.getElementById('typing-indicator');
-        if (typingIndicator) typingIndicator.style.display = 'none';
         const getReplyBtn = document.getElementById('get-reply-btn');
         if (getReplyBtn) getReplyBtn.disabled = false;
+        if (typingIndicator) {
+          if (typingStatus[chatId]) {
+            // 恢复“xxx正在输入中...”
+            let typingTargetName = '';
+            if (chatType === 'group') {
+              const groupInfo = db.messaging.groups[chatId];
+              typingTargetName = groupInfo ? groupInfo.name : '';
+            } else {
+              const character = db.relations[chatId];
+              typingTargetName = character ? character.name : '';
+            }
+            typingIndicator.textContent = `“${typingTargetName}”正在输入中...`;
+            typingIndicator.style.display = 'block';
+          } else {
+            typingIndicator.style.display = 'none';
+          }
+        }
       }
 
       // --- AI Interaction & Prompts ---
@@ -3331,10 +3351,10 @@ details:
               // Optionally, switch to the settings tab
               return;
           }
-
+  
           const chatType = chatView.dataset.currentChatType;
           let typingTargetName;
-
+  
           if (chatType === 'group') {
               const groupInfo = db.messaging.groups[chatId];
               if (!groupInfo) return;
@@ -3344,7 +3364,7 @@ details:
               if (!character) return;
               typingTargetName = character.name;
           }
-
+  
           isGenerating = true;
           document.getElementById('get-reply-btn').disabled = true;
           const typingIndicator = document.getElementById('typing-indicator');
@@ -3352,6 +3372,9 @@ details:
           typingIndicator.style.display = 'block';
           chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
 
+          // 新增：记录当前chatId的“正在输入”状态
+          typingStatus[chatId] = true;
+  
           try {
               const systemPrompt = generateSystemPrompt(chatId, chatType);
               const history = db.messaging.chatHistory[chatId] || [];
@@ -3362,7 +3385,7 @@ details:
                    } else {
                        author = db.relations[m.发送方]?.name || m.发送方;
                    }
-
+  
                    // Handle multimodal messages (vision)
                    if (m.type === 'photo' && m.photo) {
                         return {
@@ -3373,7 +3396,7 @@ details:
                            ]
                        };
                    }
-
+  
                    // Handle text messages (including described photos like 'sunset.jpg')
                    let content = `[${author}的消息：${m.内容}]`;
                    return {
@@ -3381,28 +3404,33 @@ details:
                        content: content
                    };
                });
-
-              const payloadMessages = [{ role: 'system', content: systemPrompt }, ...messagesToSend];
-
-              const openaiPayload = { model, messages: payloadMessages, stream: true };
-              const response = await fetch(`${url}/v1/chat/completions`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-                  body: JSON.stringify(openaiPayload)
-              });
-
-              if (!response.ok) throw new Error(`API Error: ${response.status} ${await response.text()}`);
-              
-              await processStream(response, chatId);
-
-          } catch (error) {
-              console.error('AI回复失败:', error);
-              alert(`AI回复失败: ${error.message}`);
-          } finally {
-              isGenerating = false;
-              document.getElementById('get-reply-btn').disabled = false;
-              typingIndicator.style.display = 'none';
-          }
+  
+             const payloadMessages = [{ role: 'system', content: systemPrompt }, ...messagesToSend];
+  
+             const openaiPayload = { model, messages: payloadMessages, stream: true };
+             const response = await fetch(`${url}/v1/chat/completions`, {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+                 body: JSON.stringify(openaiPayload)
+             });
+  
+             if (!response.ok) throw new Error(`API Error: ${response.status} ${await response.text()}`);
+             
+             await processStream(response, chatId);
+  
+         } catch (error) {
+             console.error('AI回复失败:', error);
+             alert(`AI回复失败: ${error.message}`);
+         } finally {
+             isGenerating = false;
+             document.getElementById('get-reply-btn').disabled = false;
+             // 只隐藏当前chatId的“正在输入”
+             typingStatus[chatId] = false;
+             // 只有当前chatId时才隐藏
+             if (chatView.dataset.currentChatId === chatId) {
+               typingIndicator.style.display = 'none';
+             }
+         }
       }
 
       chatBackButton.addEventListener('click', () => {
