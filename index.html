@@ -2956,6 +2956,10 @@ details:
         messageListView.classList.add('hidden');
         chatView.classList.remove('hidden');
 
+        // 隐藏“添加联系人/创建群聊”按钮
+        const privateControls = document.getElementById('private-message-controls');
+        if (privateControls) privateControls.style.display = 'none';
+
         const contactInfo = db.relations[chatId];
         let affinityHeartHTML = '';
         if (chatType === 'private' && contactInfo) {
@@ -3404,6 +3408,9 @@ details:
       chatBackButton.addEventListener('click', () => {
         chatView.classList.add('hidden');
         messageListView.classList.remove('hidden');
+        // 返回消息列表时显示“添加联系人/创建群聊”按钮
+        const privateControls = document.getElementById('private-message-controls');
+        if (privateControls) privateControls.style.display = '';
       });
 
       function sendMessage() {
