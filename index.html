@@ -3766,7 +3766,7 @@ details:
       // 彻底移除所有回车发送，回车只换行，所有发送仅靠按钮
       function setupEnterKeyBehavior() {
         document.querySelectorAll('textarea.chat-input').forEach(function(input) {
-          // 自动高度
+          // 只绑定自动高度，不绑定任何keydown事件
           input.addEventListener('input', function () {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
@@ -3779,6 +3779,23 @@ details:
       // 页面加载后初始化
       document.addEventListener('DOMContentLoaded', function() {
         setupEnterKeyBehavior();
+
+        // 全局拦截所有 textarea/input 的回车，防止任何回车发送
+        document.addEventListener('keydown', function(e) {
+          const el = e.target;
+          if (
+            (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && el.type === 'text')) &&
+            e.key === 'Enter' &&
+            !e.ctrlKey && !e.altKey && !e.metaKey
+          ) {
+            // 只允许换行，不允许触发 form submit 或发送
+            // textarea 默认允许换行，input 阻止
+            if (el.tagName === 'INPUT') {
+              e.preventDefault();
+            }
+            // textarea 不阻止默认，允许换行
+          }
+        }, true); // useCapture: true，确保最先拦截
       });
 
       const avatarUploadInput = document.getElementById('avatar-upload-input');
@@ -3872,19 +3889,18 @@ details:
           }
       });
       // 支持 Shift+Enter 换行，Enter 发送
-      storyMessageInput.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          storySendButton.click();
-        }
-      });
-      // 自动高度
-      storyMessageInput.addEventListener('input', function () {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
-      });
-      // 初始高度
-      storyMessageInput.style.height = storyMessageInput.scrollHeight + 'px';
+      // 彻底移除主线剧情输入框的回车发送，只保留自动高度，保证按钮可用
+      if (storyMessageInput) {
+        // 移除所有 keydown 事件（如有）
+        storyMessageInput.onkeydown = null;
+        // 自动高度
+        storyMessageInput.addEventListener('input', function () {
+          this.style.height = 'auto';
+          this.style.height = (this.scrollHeight) + 'px';
+        });
+        // 初始高度
+        storyMessageInput.style.height = storyMessageInput.scrollHeight + 'px';
+      }
 
       const difficultyMap = {
         simple: 'tag-difficulty-simple',
