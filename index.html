@@ -800,11 +800,24 @@
         border-radius: 6px;
       }
       #memory-table-body td {
-        max-width: 120px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        padding: 0.5rem 0.5rem;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding: 0.5rem 0.5rem;
+      transition: all 0.2s;
+      }
+      #memory-table-body tr.expanded td {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: initial !important;
+        background: #f8fafc;
+        vertical-align: top;
+      }
+      #memory-table-body .memory-cell-content {
+        display: block;
+        width: 100%;
+        word-break: break-all;
       }
       @media (max-width: 600px) {
         #memory-table-body td {
@@ -1772,6 +1785,10 @@
           showToast('存档失败，数据库操作错误！', 'error');
         }
       };
+      // 保证每次存档后刷新顶栏
+      if (typeof renderHeader === 'function') {
+        renderHeader();
+      }
 
       function getInitialDb() {
         const protagonist = {
