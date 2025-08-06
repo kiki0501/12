@@ -988,40 +988,41 @@
                 <h2 class="text-2xl font-bold">用户设定</h2>
                 <button data-close-button class="text-3xl font-bold text-gray-500 hover:text-gray-800">&times;</button>
             </div>
-            <div>
-                <div class="flex flex-col items-center mb-4">
-                    <img id="user-avatar-preview" class="w-24 h-24 rounded-full cursor-pointer object-cover" title="点击更换头像">
-                    <input type="file" id="user-avatar-input" class="hidden" accept="image/*">
-                </div>
-                <div class="mb-4">
-                    <label for="user-name-input" class="block text-sm font-medium text-gray-700">你的名字</label>
-                    <input type="text" id="user-name-input" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                </div>
-                <div class="mb-4">
-                    <label for="user-desc-input" class="block text-sm font-medium text-gray-700">详细介绍</label>
-                    <textarea id="user-desc-input" rows="6" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></textarea>
-                </div>
-                <!-- 属性设定分区 -->
-                <div class="mb-4 border-t pt-4">
-                    <label class="block text-base font-bold text-gray-700 mb-2">属性设定</label>
-                    <div class="grid grid-cols-1 gap-2">
-                        <div>
-                            <label for="user-identity-input" class="block text-sm font-medium text-gray-700">身份（每行一个）</label>
-                            <textarea id="user-identity-input" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="如：天澜国公主&#10;离火丹宫亲传弟子"></textarea>
-                        </div>
-                        <div>
-                            <label for="user-spiritroot-input" class="block text-sm font-medium text-gray-700">灵根（每行一个）</label>
-                            <textarea id="user-spiritroot-input" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="如：水木双灵根&#10;天级"></textarea>
-                        </div>
-                        <div>
-                            <label for="user-cultivation-input" class="block text-sm font-medium text-gray-700">修为（每行一个）</label>
-                            <textarea id="user-cultivation-input" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="如：化神期&#10;炼气期"></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex justify-end">
-                    <button id="save-user-settings-btn" class="btn-primary">保存</button>
-                </div>
+            <div style="max-height: 70vh; overflow-y: auto;" class="pr-2">
+              <div class="flex flex-col items-center mb-4">
+                <img id="user-avatar-preview" class="w-24 h-24 rounded-full cursor-pointer object-cover" title="点击更换头像">
+                <input type="file" id="user-avatar-input" class="hidden" accept="image/*">
+              </div>
+              <div class="mb-4">
+                  <label for="user-name-input" class="block text-sm font-medium text-gray-700">你的名字</label>
+                  <input type="text" id="user-name-input" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+              </div>
+              <div class="mb-4">
+                  <label for="user-desc-input" class="block text-sm font-medium text-gray-700">详细介绍</label>
+                  <textarea id="user-desc-input" rows="6" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></textarea>
+              </div>
+              <!-- 属性设定分区 -->
+              <div class="mb-4 border-t pt-4">
+                  <label class="block text-base font-bold text-gray-700 mb-2">属性设定</label>
+                  <div class="grid grid-cols-1 gap-2">
+                      <div>
+                          <label for="user-identity-input" class="block text-sm font-medium text-gray-700">身份（每行一个）</label>
+                          <textarea id="user-identity-input" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="如：天澜国公主&#10;离火丹宫亲传弟子"></textarea>
+                      </div>
+                      <div>
+                          <label for="user-spiritroot-input" class="block text-sm font-medium text-gray-700">灵根（每行一个）</label>
+                          <textarea id="user-spiritroot-input" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="如：水木双灵根&#10;天级"></textarea>
+                      </div>
+                      <div>
+                          <label for="user-cultivation-input" class="block text-sm font-medium text-gray-700">修为（每行一个）</label>
+                          <textarea id="user-cultivation-input" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="如：化神期&#10;炼气期"></textarea>
+                      </div>
+                  </div>
+              </div>
+              <!-- 保存按钮固定底部，防遮挡 -->
+              <div class="sticky bottom-0 left-0 w-full bg-white/90 pt-2 pb-3 flex justify-end z-10" style="backdrop-filter: blur(8px);">
+                  <button id="save-user-settings-btn" class="btn-primary">保存</button>
+              </div>
             </div>
         </div>
     </div>
