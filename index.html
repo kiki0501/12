@@ -2711,10 +2711,110 @@ details:
         const pointsEl = document.getElementById('player-points');
         const shopPointsEl = document.getElementById('current-points');
 
-        if (identityEl) identityEl.textContent = protagonist.identity;
-        if (spiritRootEl) spiritRootEl.textContent = `${protagonist.spiritRoot.name} [${protagonist.spiritRoot.grade}]`;
-        if (cultivationRealmEl) cultivationRealmEl.textContent = cultivation.realm;
-        if (cultivationStageEl) cultivationStageEl.textContent = cultivation.stage ? `${cultivation.stage}层` : '';
+        // 多身份换行显示
+        if (identityEl) {
+          if (Array.isArray(protagonist.identity)) {
+            identityEl.innerHTML = protagonist.identity.map(item => item || '').join('<br>');
+          } else if (protagonist.identity) {
+            identityEl.textContent = protagonist.identity;
+          } else if (protagonist.description) {
+            // 自动从设定文本中提取身份（如“附加身份:1.xxx 2.xxx”）
+            const match = protagonist.description.match(/附加身份[:：]([\s\S]+)/);
+            if (match) {
+              // 提取所有“1.xxx 2.xxx”或“1、xxx 2、xxx”格式
+              const lines = match[1].split(/[\n\r]+/).map(l => l.trim()).filter(Boolean);
+              let identities = [];
+              lines.forEach(line => {
+                const found = line.match(/(\d+)[\.、:：]?\s*([^\d]+)/g);
+                if (found) {
+                  found.forEach(item => {
+                    const txt = item.replace(/^\d+[\.、:：]?\s*/, '');
+                    if (txt) identities.push(txt);
+                  });
+                } else if (line) {
+                  identities.push(line);
+                }
+              });
+              identityEl.innerHTML = identities.length ? identities.join('<br>') : '';
+            } else {
+              identityEl.textContent = '';
+            }
+          } else {
+            identityEl.textContent = '';
+          }
+        }
+        // 灵根多格式兼容换行，自动识别设定文本
+        if (spiritRootEl) {
+          const sr = protagonist.spiritRoot;
+          if (Array.isArray(sr)) {
+            spiritRootEl.innerHTML = sr.map(item => {
+              if (typeof item === 'string') return item;
+              if (item && typeof item === 'object') {
+                return `${item.name || ''}${item.grade ? ' [' + item.grade + ']' : ''}`;
+              }
+              return '';
+            }).join('<br>');
+          } else if (sr && typeof sr === 'object') {
+            spiritRootEl.textContent = `${sr.name || ''}${sr.grade ? ' [' + sr.grade + ']' : ''}`;
+          } else if (typeof sr === 'string') {
+            spiritRootEl.textContent = sr;
+          } else if (protagonist.description) {
+            // 自动从设定文本中提取灵根
+            // 例：“水木火三灵根”、“三灵根”、“水灵根”、“天级”
+            const match = protagonist.description.match(/([金木水火土冰雷风毒幻]+)(三|四|五)?灵根/);
+            const grade = protagonist.description.match(/(天|地|玄|黄|白)级/);
+            if (match) {
+              let roots = match[1].split('').join('、');
+              let rootText = roots + (match[2] ? match[2] : '') + '灵根';
+              if (grade) rootText += ` [${grade[1]}级]`;
+              spiritRootEl.textContent = rootText;
+            } else {
+              spiritRootEl.textContent = '';
+            }
+          } else {
+            spiritRootEl.textContent = '';
+          }
+        }
+        // 修为多格式兼容换行，自动识别设定文本
+        if (cultivationRealmEl) {
+          const cv = protagonist.cultivation;
+          if (Array.isArray(cv)) {
+            cultivationRealmEl.innerHTML = cv.map(item => {
+              if (typeof item === 'string') return item;
+              if (item && typeof item === 'object') {
+                return `${item.realm || ''}${item.stage ? ' ' + item.stage + '层' : ''}`;
+              }
+              return '';
+            }).join('<br>');
+          } else if (cv && typeof cv === 'object') {
+            cultivationRealmEl.textContent = `${cv.realm || ''}${cv.stage ? ' ' + cv.stage + '层' : ''}`;
+          } else if (typeof cv === 'string') {
+            cultivationRealmEl.textContent = cv;
+          } else if (protagonist.description) {
+            // 自动从设定文本中提取修为（如“化神级”、“无修为/炼气期”）
+            const match = protagonist.description.match(/(无修为|炼气期|筑基期|金丹期|元婴期|化神级?|合道期|大乘期|渡劫期|圣人|天尊|长老|皇|主|宗主|期|级)/g);
+            if (match) {
+              cultivationRealmEl.innerHTML = match.join('<br>');
+            } else {
+              cultivationRealmEl.textContent = '';
+            }
+          } else {
+            cultivationRealmEl.textContent = '';
+          }
+        }
+        if (cultivationStageEl) {
+          const cv = protagonist.cultivation;
+          if (Array.isArray(cv)) {
+            cultivationStageEl.innerHTML = cv.map(item => {
+              if (item && typeof item === 'object' && item.stage) return `${item.stage}层`;
+              return '';
+            }).filter(Boolean).join('<br>');
+          } else if (cv && typeof cv === 'object') {
+            cultivationStageEl.textContent = cv.stage ? `${cv.stage}层` : '';
+          } else {
+            cultivationStageEl.textContent = '';
+          }
+        }
 
         const progress = cultivation.progress || 0;
         if (cultivationProgressEl) cultivationProgressEl.style.strokeDasharray = `${progress}, 100`;
