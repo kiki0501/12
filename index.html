@@ -547,8 +547,8 @@
         padding: 0.5rem;
       }
       .story-card {
-        max-width: 85%;
-        padding: 0.75rem 1rem;
+        max-width: 98%;
+        padding: 0.75rem 1.2rem;
         border-radius: 1rem;
         line-height: 1.6;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
@@ -3604,13 +3604,16 @@ details:
             const card = document.createElement('div');
             card.classList.add('story-card');
             card.dataset.storyIndex = index;
-            
+
+            // 增加卡片宽度
+            card.style.maxWidth = '98%';
+
             const currentResponse = logEntry.responses[logEntry.currentIndex];
             let content = currentResponse || '';
 
             const controls = document.createElement('div');
-            controls.className = 'story-card-controls';
-            
+            controls.className = 'story-card-controls flex justify-end items-center gap-2 mt-2 opacity-80';
+
             const checkboxHTML = `<input type="checkbox" class="story-selection-checkbox form-checkbox h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">`;
 
             if (logEntry.type === 'user') {
@@ -3633,7 +3636,8 @@ details:
             // Allow both HTML and Markdown
             card.innerHTML = marked.parse(content, { gfm: true, breaks: true });
             cardWrapper.appendChild(card);
-            cardWrapper.appendChild(controls);
+            // controls 移到卡片下方
+            card.appendChild(controls);
             container.appendChild(cardWrapper);
         });
 
